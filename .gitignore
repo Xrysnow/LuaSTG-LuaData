@@ -20,6 +20,12 @@
 #log文件不需要
 /game/log.txt
 
+#游戏设置不需要
+/game/setting
+
+#编辑器产生的setting不需要
+/editor/editor/EditorSetting.lua
+
 #编辑器产生的临时文件不需要
 /editor/editor/tmp/*
 /editor/pack_log.txt
