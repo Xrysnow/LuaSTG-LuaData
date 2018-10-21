@@ -1,0 +1,500 @@
+--LuaSTG_ex + 0.81 --
+
+Editor层
+-去除了属性设置表里的class与aniY
+*修改了set value to节点的图标，使之能够与move to节点区分Y
+*修改了boss ex define节点的图标，使之能够与boss define节点区分Y
+
+Data层
++plus\\WalkImageSystem.lua，使用plus.Class制作的行走图系统代码Y
+-移除了曲线激光的_data属性，现在使用ex的新碰撞检查函数检查擦弹Y
+!修正了Dev模式下F8的判定显示失效的问题Y
+!修正了信仰点在miss后无法通过上线收点的问题Y
+!修正了boss开卡前释放spell触发的高防阶段失效的问题
+!修正了Enemy的hscale无法设置的问题Y
+*去除了代码中遗留的诸多print与PrintY
+*优化了renderstar与rendercircle函数的逻辑，提升效率Y
+*合并了雷光与曲光，现在通过self.sample可以自由切换雷光与曲光了Y
+*现在雷光支持设置颜色，半开，关闭了Y
+*修正了boss阶段切换时血条类型的检查范围，现在两卡间使用多个动作的情况下也能正确设置血条样式了
+*修改了boss/enemy/player的行走图代码，改为使用行走图类完成动作Y
++boss.no_clear_buller参数，为true时会跳过动作结束时的消弹并自动清除该参数（注：boss explode时该参数无效）
++GetImageSize(img)用于获取对应img加载的图像大小Y
++ex.SetLabelToObject(label,obj)用于设置一个标签用于指向目标object
++ex.GetObjectFromLabel(label)用于获取标签所指向的object，若对象不存在则返回nil
++boss.current_card用于指向boss当前正在执行的card，防止因修改boss.card_num导致出现动作错误的问题
++boss.aura_scale=1用于设置boss的法阵大小
++GROUP_SPELL=8碰撞组，该组会检测与Y
+    GROUP_EMENY
+    GROUP_NONTJT
+    GROUP_EMENY_BULLET
+    GROUP_INDES
+碰撞组的碰撞并执行自身的碰撞回调函数
++多工程模块化编译支持
+
+=======以下为预计制作内容=======
+Editor层
+!修正编辑器新建工程不指定文件名时会保存在编辑器路径并且没有后缀的问题
++pack the project设置项，设置为true在编译时会自动打包当前工程进入mod中
++pack file节点，用于将目标文件打包至mod中的目标路径位置
++set auto sp point节点，用于设置会自动消除的阶段点（又一个意义不大的东西）
++preserve object节点，用于取消目标object的kill/del标签使之能够继续留存于场上
++set label to object节点，用于设置一个标签用于指向该对象
++get object from label节点，用于获取标签所指向的对象，若对象存在则以self指向该对象并执行子节点内容
++多工程模块化编译实装
+
+Data层
++jstg.GetLocalSlot()用于获取本地输入的槽位表
+
+
+--LuaSTG_ex + 0.80f --
+
+Editor层
+!修正了task clear节点无法插入boss spellcard ex节点中的问题
+!修正了set boss ui display节点中spell name与time counter设置项目错误的问题
+!修正了comment节点嵌套使用时会产生错误的问题（一定程度上）
+*去除了boss spellcard节点生成代码时对于前一动作的无用判断
+*修改了scdebug的生成逻辑，用于支持新scdebugger
++添加了二次B样条曲线的节点
+
+Data层
+!修正了rep编号10及以后无法被检测到的问题
+!修正了COLOR_DEEP_GREEN的数值
+!移除了激光Head的偏移
+!修正了雾化阶段frame执行do default action会导致出现无限循环的问题
+!修正了符卡练习时间设置错误时提示信息描述不准确的问题
+*将bullet ex与加速度等相关支持由3次遍历合并为了1次
+*现在退出符卡练习时会返回符卡练习菜单而非主菜单了
+*现在rep保存时会预先填写上一次保存的rep名称了
+*现在符卡练习中难度会显示boss的难度标签了，如果为"All"则显示"SpellCard"
+*修改了scdebugger的逻辑使之更贴近符卡练习
+*现在起生成的scdebug支持执行前一动作了
++增加了二次B样条曲线，可以经过采样点连线的中点(by Xiliusha)
+
+--LuaSTG_ex + 0.80e --
+
+Editor层
++添加了Catmull-Rom曲线的节点
+*修改了贝塞尔曲线的图标使之更符合实际
+!修正了item生成列表中spell碎片名称错误的问题
+-去除了属性设置列表中的dx/dy属性
+
+Data层
++添加了smear与LoadMusicRecord的重复载入规避，以防卡顿
+!修正了等待时reply拼写为relpy的错误
+!修正了宽屏释放spell时mask不满全屏的问题
+!修正了bullet关判定后雾化结束时会导致判定恢复的问题
+!修复了enemy如果开启了死亡消弹击破时会报错的问题
+!修正了setting删除后retry键消失的问题
+!修正了boss扭曲在屏幕边缘导致的黑边(shader来自void)
+!修正了无体术组的错误
+!修正了符卡背景拼接在宽屏时渲染错误的问题
+!修正了item的坐标范围使之能跟随lstg.world变化
+!修正了rep录制时lstg.var的保存位置
++增加了Catmull-Rom曲线，可经过每个控制点(by青山)
+*设置了Boss的背景和BGM后，在符卡测试中也会生效了(by青山)
+!修复了咲夜机体多人时射击范围会同时跟随双方按键变化的问题(by青山)
+
+LSTG层
+!修复了FindFiles函数获取到的文件列表错误的问题
+
+--LuaSTG_ex + 0.80d --
+
+Data层
++增加了咲夜（by青山）
++增加了2P配色（by青山）
+!修复了2P同时收点时报错的问题
+
+--LuaSTG_ex + 0.80c --
+
+Data层
+*普通对象的BoundCheck现在根据其所在的场地决定范围
+*玩家的移动范围以玩家所在场地决定
++增加了StagePractice中多人玩家选择的菜单
+!修复了多玩家Miss后无敌的目标可能不正确的问题
+!修复了击破消弹报错的问题
+*StageTask现在可以响应超级暂停了
++ran:Player()获得一个随机玩家
++SetPlayer(player)用来设置当前的玩家，只起一帧的作用，可以用于指定aim to player的行为
+
+LSTG层
+!增加了房间建立时的成功率yu
+
+--LuaSTG_ex + 0.80b --
+
+文件层
+!launcher修复了无法绑定按键的问题
+*launcher现在可以调整1P和2P按键了
+*launcher载入mod时不再重新弹出窗口
++network.txt增加了网络输入延迟，-1为自动
+
+Data层
+!修复了Players()不能正确枚举与其相同场地玩家的问题，修复了符卡击破无法消弹的问题
+!修复了魔理沙的雷不正常的问题
+!修复了播放Replay时1P2P输入可能相反的问题
++ran:List(list)从list中随机选择一个对象
++增加了双人伤害惩戒，双人为2/3伤害，当双人不在一个场地时没有惩戒
+
+LSTG层
+*设置object._speed当初始速度为0时，速度方向以rot为准
+*设置object._angle当初始速度为0时，会改变rot朝向
+*获取object._angle当初始速度为0时，得到rot
+
+--LuaSTG_ex + 0.80a --
+
+Editor层
++StageGroupInfo节点，设置最小和最大玩家数
+	挂在StageGroup下
++SetWorlds节点，设置场地
+	可以挂在任意位置，不过推荐stagetask里
++AddWorld节点，设置单个场地，只能挂在SetWorlds下
+	Width 场地宽度
+	Height 场地高度
+	Bound 出场消除的范围（32）
+	Left 左边
+	Bottom 底边
+	WorldMask 世界掩码，推荐单世界为7，双世界为3和5
+
+Data层
++jstg.worldcount 当前世界的个数
++jstg.worlds 当前所有的世界对象，代替lstg.world
+*world对象增加了一个world属性，代表该world的掩码
+
++jstg.players 类型为unitlist，当前所有的玩家对象
++jstg.enable_player 是否使用了jstg的player系统，用于区分活7等旧版mod
+
++Player(obj=GetCurrentObject()) 获取一个与obj处在相同世界的player，如果没有，则返回默认player。不使用随机数。
+	代替选择任意player
++Players(obj=GetCurrentObject()) 获取与obj处在相同世界的全部player，返回一个unitlist
+	代替遍历player
++IsPlayer(obj) 判断obj是否为玩家，如果是，则设置player为obj
++IsPlayerEnd() 取消IsPlayer设置的player
+	与IsPlayer一起代替遍历对象时是否是玩家的判断
++ListSet(list,attr,value) 设置list中所有obj的attr属性为value
++jstg.GetObjectByWorld(list,world) 获得list中所有属于世界world码的对象，返回一个新的unitlist
++jstg.GetPlayersByWorld(world) 获得属于world码的所有世界
+*player 现在为根据stage时间固定选择的一个player
+*lstg.player 现在用来表示各个player共通的属性的对象
++lstg.var.player_name2 用来表示第二个玩家的机体名，不需要则设置为nil
+
++Network - Connect Multi Player 选项
++Player Mode选择菜单，选择玩家数量
+	根据stagegroup的玩家设置决定是否弹出此菜单
++1P/2P Select 菜单
+	使用1P和2P输入选择玩家的菜单
+	当双方都选中玩家后，再次按shoot键进入游戏
+	当双方都没选中玩家时，再次按spell键退回关卡选择
+*GetLastKey(slot) 增加了一个参数用来选择某个玩家的输入，默认为系统输入
+*KeyIsPressed('shoot',slot) 增加了一个参数用来选择某个玩家的输入，默认为系统输入
+
+!修复了联机游戏结束后菜单显示Network而不是Disconnect的问题
+!修复了菜单选项过长时，会出现在画面左侧的问题
+!修复了暂停菜单读取replay输入的问题
+!修复了使用GotoStage时播放replay报错的问题
+
+LSTG层
++GetCurrentObject()获取当前正在执行frame或render的lstg对象，失败返回nil
++IsInWorld(world1,world2)检查world1对象是否会在world2世界中显示，代替以前的IsSameWorld
+*IsSameWorld(world1,world2)检查world1对象与world2对象是否会在同一个世界中显示，取决于当前激活的世界状态
++ActiveWorlds(world1,world2,world3,world4)激活和设置当前世界的world码
+!修复了ConnectTo失败时游戏卡住的问题
+!修复了断开连接后ReceiveData可能会失败的问题
+*修改了IsSameWorld的判断方法
+
+--LuaSTG_ex + 0.80 --
+
+文件层
++game\LuaSTGServer.exe 启动服务器，需要输入端口号。输入s退出。
++game\network.txt 联网参数
++patch.bat 更新补丁，将文件打包至data.zip
+
+Editor层
++WaitTo功能：可以等待至具体的时间，可以在右侧插入代码
+	vStageTime：时间
+	Unit：时间单位，UNIT_SECOND为秒，UNIT_FRAME为帧数，UNIT_MUSIC为节拍数
+	Discard：是否当执行到此处时时间已经超过设置的时间时，丢弃挂在自己右侧的代码
+	Add：是否为增量模式，是的话可以替代普通task
++SetPace功能：在Audio中，可以设置节拍
+	Start Time：开始时间（秒）
+	Pace Time：小节的时间（秒）
+*PlayBGM增加了两个参数
+	Time：开始时间
+	SetStageTime：是否更新关卡的时间计数器（WaitTo使用）
+*Stage：现在将使用jstg.CreatePlayers创建玩家
+
+Data层
+ex.lua
++ex.GetMusicFrame(a) 返回当前节拍设置下a小节对应的帧数（整数）
++ex.GetMusicMeter(a) 返回第a小节开始时对应的游戏时间（秒）
++ex.stageframe 当前的关卡时间
+
+javastage.lua
++jstg.network
++jstg.network.status 网络状态：0未连接 1连接中 2已连接 3已分配位置 4已协商 5已创建输入设备
++jstg.SendData(...) 向网络中广播一个数组对象
+*GetLastKey() 替换了原有的GetLastKey，在联网中保持一致
++jstg.SinglePlayer() 断开连接并切换为单玩家模式
++jstg.CreateConnect(ctype) 开始网络连接，ctype为模式。0为单机，1为观察单人，2为合作单人。
+	合作单人目前设置了固定的2延迟。观察单人模式主机0延迟。
++jstg.GetInputEx() 从c++层获取输入
+
+title.lua
++stage_menu:update() 可以更新一个菜单的文字数据，文字数据需要在创建时保存。具体可参见下方Network菜单的实现
++Network菜单
+	Host：显示服务器IP，选择后重新读取IP信息。信息在game\network.txt中
+	Connect Single Player：连接成功后，第二个客户端将观看第一个客户端的操作
+	Connect Coop Single Player：连接成功后，两个客户端共享操作
+	Exit：取消连接并退出
+	连接成功时自动退出Network菜单，并且主菜单的Network改为Disconnect，可以断开连接
+
+launch
++loadNetwork() 重新读取网络配置信息
+
+Lstg层
++ConnectTo(const char *dest,int port)连接至指定服务器，dest为""时断开连接。返回是否连接成功
++ReceiveData()接收数据，如果成功，返回字符串。这时应当连续调用直到返回nil为止。
++SendData(const char *data)发送一个字符串，返回是否发送成功
++CreateInputDevice(bool is_remote)创建一个输入，传入true将创建一个远程输入。返回输入设备
++ReleaseInputDevice(udata device)释放一个输入设备。应先解除绑定
++AddInputAlias(udata device,int vkey,int key)增加绑定输入设备的按键，vkey为虚拟按键（0-31），key为实际键值。只对本地输入有效
++ClearInputAlias(udata device)清空输入设备的所有按键
++ResetInput()在连接前调用，保证所有客户端的输入时间初始化
++BindInput(udata device,int deviceslot,int keyslotmask,int delay)将输入设备绑定至系统，并设置延迟
+	device：用来绑定的设备，如果传入0则取消该位置的绑定
+	deviceslot：绑定的位置，0~31，不重复即可
+	keyslotmask：设备输入对应的总线输入掩码，总线共有16个不同的输入，这个掩码确定该设备会设置哪些输入
+		例如1代表传入【输入0】，4代表传入【输入2】，7代表同时传入【输入0、1、2】
+	delay：延迟帧数，所有输入应设置成一样的
++GetVKeyStateEx(int keyslot,int vkey)获得【输入keyslot】的vkey的按键状态
+	一个比较合理的分配是，【输入0】为系统输入，【输入1】之后的为对应自机的输入。
+
+--LuaSTG_ex + 0.70c --
+
+Editor层
++增加了一个上移和下移按钮
+	快捷键为Alt+↑和Alt+↓
+	如果插入模式为之前或之后，上移和下移将把选中的语句在同层或向底层移动
+	如果插入模式为子对象，上移和下移将首先尝试把选中的语句挪至目标语句的子语句里
++SetValueTo功能
+	Target：目标
+	ValueName：属性名
+	TargetValue：目标值
+	nFrame：持续变化帧数
+	Mode：模式（平滑等）
+	StartTime：开始时间
+	ValueMode：数值模式（设置、增加、乘以）
+	建立一个task，将Target.ValueName平滑变化TargetValue。
+	当目标为空时可以用属性名更改局部变量，这时task挂在self上。否则task挂在target上。	
+*RenderImage现在返回last
+*RenderImage返回的last可以设置渲染模式
++LoadImageGroup载入的资源现在可以在资源选择里显示了
+	使用红框显示当前选中的范围，可以点击
+
+Data层
+!修复了雷曲线激光的碰撞问题
+!修复了Boss碎片奖励掉落的问题
+!修复了转场时重置场地大小不完全的问题
+!修复了转场时保存的随机数可能被改变的问题
++ex.SmoothSetValueToEx(valname,y,t,mode,setter,starttime,vmode)
+	与SetValueTo不同的是，SmoothSetValueToEx以增量模式运作，可以叠加。
++一些未完成功能
+
+Lstg层
+!修复了SuperPause与暂停、replay快放等冲突的问题
++SetWorldFlag(int flag)设置世界模式，世界模式在data中默认设置为1
+	世界模式目前只影响渲染
+	可以在RenderFunc中反复设置
++GetWorldFlag()返回世界模式
++obj.world设置对象的世界，默认为1
+	目前功能未成熟
+	当对象的世界与当前世界模式位与为0时，ObjRender时不会调用对象的Render
+	如果存在父对象，obj创建时world默认设置与父对象相同。
+	比如设置妖精的world为0b100=4时，妖精的task中发射的弹幕的world也会自动设成4。
+	这个妖精可以在0b101=5和0b100=4的世界中渲染，但是不会在0b010=2的世界中渲染
+
+--LuaSTG_ex + 0.70a --
+
+Editor层
+*ClearTask增加了一个选项，可以保留当前的task
+!修复了Signal不能为字符串的问题
+*所有选择对象的地方都增加了self、last等选择
+*创建子弹组如果时间间隔为0则会立即创建并返回UnitList
++增加了Properties
+	可以替代一组self.x=x之类的赋值，提供了默认属性名。
+	一次最多可以设置5个属性
++增加了DefineUnitList
+	等效于define local ...={}
++增加了AddToUnitList
+	可以把一个对象或对象表插入另一个对象表
++增加了ForEachUnitInList
+	可以遍历一个表，与for类似可以设置变量和增量。
+	会设置unit为当前的对象
+*修改了TaskRepeat的图标，使其与Repeat区分更明显
+
+Data层
+*修复了曲线激光半开和关闭时激光头有1像素碰撞判定的问题
+
+Lstg层
++增加了椭圆判定
+	a为rot方向的半径，b为垂直方向的半径
+	F8时显示为矩形
+!修复了曲线激光过长时中间可能没有判定的问题
+	现在可以用曲线激光当折线拼多边形了
++BentLaserData.UpdatePositionByList(list,#list,width,start_index=1,reverse=0)
+	可以将曲光数据从start_index开始#list个数据更新为list中的位置。
+	默认为从激光头开始朝向激光尾。
+	可以增加激光长度。
+
+--LuaSTG_ex + 0.70 --
+
+Editor层
+!修复了boss第一个行动是符卡时符卡难度识别错误的问题
+*turn_on、turn_half_on、turn_off现在可以对曲线激光使用了
+	曲线激光默认是turn_on的状态
+
+Data层
+!修复了暂停时符卡名会掉下屏幕的问题
+*ex.LaserFormByList(laser,list,revert==nil)现在可以接受一个额外的参数revert，用来确定方向
+	默认情况list中第一个对象是激光头。
+*ex.LaserSampleByLength(laser,length)修复了rot角度不正确的问题，现在朝向激光前进方向
+*ex.LaserSampleByTime(laser,length)修复了rot角度不正确的问题，现在朝向激光前进方向
++超级暂停中普通碰撞判定无效
+
+Lstg层
+
+!修复了游戏窗口没有自动激活的问题
+!修复了F8无效的问题
+
++超级暂停(superpause)系统，当超级暂停启用时，没有设置nopause的对象将不会执行frame和task，并且暂停。
+	设置超级暂停时间的时候总是在下一帧才生效
++SetSuperPause(int time)设置超级暂停时间
++GetSuperPause()返回超级暂停时间
+	如果当帧有其他脚本修改了超级暂停时间，则该函数返回修改后的结果
++AddSuperPause(int time)增加超级暂停时间
++GetCurrentSuperPause()获得当前帧的超级暂停时间。
+
++self._speed返回或设置对象的速度，设置时保持角度不变
++self._angle返回或设置对象的前进方向，设置时速度保持不变
++self.pause单位为帧，设置时，以该帧数为持续时间暂停对象的速度对移动的影响。
+	对象的frame和task仍会执行，如果需要暂停，请在frame或task中判断
++self.nopause，布尔型，如果设置为真，该对象不受超级暂停影响。
++self.rmove，布尔型，如果设置为真，则该对象的移动将不受速度影响，并且会每帧求出其速度
+
+--LuaSTG_ex + 0.60a --
+
+*修复了Signal名不能为字符串的问题
+*修复了TaskAttach修改last的问题
+*修复了_boss失效的问题
++增加了一个演示工程
+
+--LuaSTG_ex + 0.60 --
+
+Editor层
++TaskDefine节点。与enemy类似，需要设置一个名称。可以传递参数。本身提供一个task环境。
++TaskAttach节点。对指定的对象追加一个TaskDefine的task并设置参数。
+!CreateSimpleEnemy节点。现在返回last可以用来追加task。
++MoveToEx节点。按照偏移量移动对象。与其他位置控制不冲突。
++BezierMoveToEx节点。按照偏移量移动对象。与其他位置控制不冲突。
+*Else节点现在可以复制粘贴，并且可以设置一个参数变为elseif。
+
+Data层
++self.spell_get在boss中使用，获得上一张卡是否收取成功
++self.spell_timeout在boss中使用，获得上一张卡是否超时
++self.spell_damage在boss中使用，获得上一张符卡所受的伤害
+!修复了非时符在超时时也收取的问题
++对象组UnitList:普通的包含对象的数组
++ex.UnitListUpdate更新并删除对象组中已失效的对象，返回长度
++ex.UnitListAppend把一个对象或一个对象组放入另一个对象组后面	
++ex.LaserSampleByLength对曲线激光按照长度采样，返回一个对象组
++ex.LaserSampleByTime对曲线激光按照时间间隔采样（单位：秒），返回一个对象组
++ex.LaserFormByList使用一个对象组刷新曲线激光的路径，并设置速度和方向
+*编辑器的_kill和_del现在可以对对象组使用
+*boss数组现在使用ex.UnitList维护
+
+Lstg层
++SampleBezier(list,#list,length,rate=0.4)
+	对一个对象组按照Bezier过点曲线平滑采样，间距为length（像素），rate是拐角的平滑度
+	返回一个新的对象组
+
+--LuaSTG_ex + 0.50b --
+!修复了BossEx节点选择资源的问题
+
+--LuaSTG_ex + 0.50a --
+
+!修复了多个boss时报错的问题
+!修复了BossEx无法关闭血条的问题
+*BossEx现在可以关闭魔法阵、使用cast
+
+--LuaSTG_ex + 0.50--
+
+版本基于LuaSTG_er+1.02修改
+
+Editor层
+
+General
+* Comment现在可以带子节点了，并且增加了一个参数用来关闭注释并激活子节点
+
+Task
++ SetSignal和WaitForSignal节点
+	用法：SetSignal可以将一个命名信号设置成指定的值，在task中WaitForSignal可以等待信号变成指定的值
+
+Boss 
++ SetUI节点。SetUI可以指定boss是否显示HP条、名称、符卡名、时间，以及该ui是否需要占用空间（见Data层的boss）
++ DefineBossEX节点。
+	DefineBossEX提供一个task环境，可以在其中使用BossEX系（见下）的函数、普通task中的函数，如判断等。可用于组织动态符卡选择
+	注意：在define boss ex节点task下新建的task会在使用和结束符卡时被清空
++ SpellCardEX节点。
+	不需要在boss节点下定义的SpellCard。需要一个全局唯一的ID。
+	Fake spell card属性可以让boss该非符阶段的血槽由非符变为符卡色 
+	目前不支持符卡练习
++ PrepareMultipleCards节点
+	在DefineBossEX中使用，准备施展一身符卡与非符。目前最多可以指定5个符卡或非符。使用的是符卡的ID。
+	Total SCs Left用于提示UI有多少张剩余符卡
+	这一身的非符、符卡会显示在当前这一身的血条上，血条长度以符卡ID对应符卡的血量计算
+	并不一定非要释放这里指定的符卡
+	不使用PrepareMultipleCards也可以直接释放符卡
++ DoCastCard节点
+	在DefineBossEX中使用，释放非符、符卡。
+	可以指定符卡ID释放对应符卡，如果不指定ID，则释放PrepareMultipleCards中准备的下一张符卡。
+	Wait For Finish可以等待符卡完成
++ JoinCooperateCast节点
+	在DefineBossEX中使用，用正在施展的符卡参加一个联合施展。用来进行多boss击破的联动。
+	Cooperate id，当前联合施展组的id。如果boss非常多，可以用这个id来区分联动的符卡。如果只有一组boss，始终设置成1即可。联动结束时id会被回收。
+	Mode，模式，目前支持0：另一张符卡击破时本符卡会被连带击破。不能保证击破帧数精确相同。
+	Wait after finish：结束后等待一定的时间。可以保证等待后所有boss的task帧数精确相同。
+	如果要是用JoinCooperateCast，请关闭之前的DoCastCard的Wait For Finish。
++ FinishBossEx节点
+	用来结束符卡或boss。
+	Is finish spell为真时会结束当前的符卡。
+	Is finish spell为假时会删除当前的boss，如果设置了Is explode，则会发起击破效果，否则就是直接删除
+* SpellCard节点
+	在最后增加了一个可选的ID节点，使BossEX也可以使用这张符卡。
+
+Object
+* ChangeColorBlend
+	现在可以正确的作用在boss、laser、bentlaser上了
+	增加了一个alpha-bal的反色模式，使用纯黑色，可以按照半透明素材对背景进行渐变反色
+	
+Data层
+* 修改了Tasker，使其可以应用在自己绑定的对象以外另一个对象上
++ 增加了ex.lua
++ 增加了ex.GetRandomBoss()，用于获取当前场地上一个随机的boss
++ 增加了ex.GetFirstBoss()，获取场地上第一个boss
+* 大幅修改了boss.lua，使其兼容BossEX。
+* sc_bonus相关变量挪至boss中。现在创建多个boss可以正确的计算符卡奖励和收取情况了
+* boss_ui现在可以展开了，多个boss的ui可以按照先后次序展开显示。
+	如果需要两个boss显示一个ui，在不需要显示的boss里设置UI时除血条全部隐藏，并设置need position为false。
++ temple3背景，用来展示模型和深度缓存
+
+Lstg层
++ 增加了SetZBufferEnable(bool a1)，在3d模式中设置是否启用深度缓存
++ 增加了ClearZBuffer(value a1 = 1.0)，清空深度缓存
++ 增加了LoadModel(string id,string path)，用于载入一个.obj和.mtl文件，目前只支持由3dmax7导出的obj，并且只支持一个纹理。
+	纹理需要使用LoadTexture载入，并且纹理ID应与mtl中的纹理文件名相同。
++ 增加了RenderModel(string id,value x,y,z,scalex,scaley,scalez,pitch=0,yall=0,row=0)用来在指定位置以指定缩放与旋转渲染模型。
+* 增加max buffer从1024到20000，用以支持6000个面的模型。
+
+Fancy2D层
+* 第一层纹理的顶点色与纹理色交换了位置，不影响add或mul，但是对其他的顶点色混合方案有影响
+* 延迟从2帧改为1帧
+* CommandBuffer现在以Batch模式运行，相同的纹理会合并
