@@ -14,3 +14,6 @@
 *.zip
 *.rep
 *.bat
+*.luastg
+*.luastg.bak.*
+/editor/editor/tmp/*
