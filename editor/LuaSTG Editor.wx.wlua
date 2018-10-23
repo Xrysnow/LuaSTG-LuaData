@@ -1013,9 +1013,9 @@ function main()
 		local fileName=filePickerNewProj:GetPath()
 		if fileName=="" then wx.wxMessageBox("Specify file path and name first","Error",wx.wxICON_ERROR) return end
 		local msg=LoadFromFile("editor\\templates\\"..templates[listTemplate:GetSelection()+1][2])
-        if string.sub(fileName, -7)~=".luastg" then
-            fileName="project\\"..fileName..".luastg"
-        end
+        --if string.sub(fileName, -7)~=".luastg" then
+        --    fileName="project\\"..fileName..".luastg"
+        --end
         if msg==nil then
 			local msg2=SaveToFile(fileName)
 			if msg2==nil then
