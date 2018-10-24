@@ -328,8 +328,9 @@ function boss:explode(a)
                 New(boss_death_ef_unit,self.x,self.y,l/lifetime,ran:Float(0,360),lifetime,ran:Float(2,3))
                 task.Wait(1)
             end
-            PlaySound("enep01",0.5,self.x/256)
-            New(deatheff,self.x,self.y,'first')
+            
+			PlaySound("enep01",0.5,self.x/256)
+			New(deatheff,self.x,self.y,'first')
             New(deatheff,self.x,self.y,'second')
             
             Kill(self)
