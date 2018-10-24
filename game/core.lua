@@ -33,6 +33,7 @@ GOLD=360*(math.sqrt(5)-1)/2
 
 DoFile("plus\\plus.lua")
 DoFile("ex\\ex.lua")
+DoFile("sp\\sp.lua")
 
 require "rebounding"
 -----
