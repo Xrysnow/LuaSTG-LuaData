@@ -17,18 +17,28 @@
 *.luastg
 *.luastg.bak.*
 
+#这个傻吊文件不需要
+/game/Thlib/UI/font/default_ttf
+
 #log文件不需要
 /game/log.txt
+/game/sp_log.txt
 
 #游戏设置不需要
 /game/setting
 
+#doc不需要
+/doc/*
+
+#编辑器不需要
+/editor/*
+
 #编辑器产生的setting不需要
 /editor/editor/EditorSetting.lua
-
 #编辑器产生的临时文件不需要
 /editor/editor/tmp/*
 /editor/pack_log.txt
+
 #不需要mod文件夹的内容
 /game/mod/*
 #不需要rep文件夹的内容
@@ -37,5 +47,8 @@
 /game/score/*
 #不需要snapshot文件夹的内容
 /game/snapshot/*
+#不需要autorun文件夹的内容
+/game/autorun/*
+
 #不需要tools文件夹的内容
 /tools/*
