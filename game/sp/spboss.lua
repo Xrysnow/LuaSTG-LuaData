@@ -51,33 +51,17 @@ end
 ---@param nRow number @水平分割数
 ---@param a number @横向判定半径
 ---@param b number @纵向判定半径
----@param inv number @行走图更新间隔
+---@param intv number @行走图更新间隔
 ---@param imgs table @每行图片数目
 ---@param anis table @动画循环帧数
 ---@param scbg string @符卡背景对象名称
-function lib.define(id, name, img, nCol, nRow, a, b, inv, imgs, anis, scbg)
+function lib.define(id, name, img, nCol, nRow, a, b, intv, imgs, anis, scbg)
 	lib.list.boss[id] = Class(lib.boss_default)
 	lib.list.boss[id].id = id
-	lib.list.init[id] = {name, img, nCol, nRow, a, b, inv, imgs, anis, scbg}
+	lib.list.init[id] = {name, img, nCol, nRow, a, b, intv, imgs, anis, scbg}
 	lib.list.boss[id].init = function(self, id, x, y, slot)
-		local name, img, nCol, nRow, a, b, inv, imgs, anis, scbg = unpack(lib.list.init[id])
-		if img ~= '' then
-			self.nn, self.mm = imgs, anis
-			local bossimg = img
-			local number_n = {}
-			for i = 1, nRow do number_n[i] = nCol end
-			LoadTexture('anonymous:'..bossimg, bossimg)
-			local bosstexture_n, bosstexture_m = GetTextureSize('anonymous:'..bossimg)
-			local w, h = bosstexture_n / nCol, bosstexture_m / nRow
-			for i = 1, nRow do
-				LoadImageGroup('anonymous:'..bossimg..i, 'anonymous:'..bossimg, 
-					0, h * (i - 1), w, h, number_n[i], 1, a, b)
-			end
-			for i = 1, nRow do self['img'..i] = {} end
-			for i = 2, nRow do self['ani'..i] = imgs[i] - anis[i - 1] end
-			for i = 1, nRow do for j = 1, imgs[i] do self['img'..i][j] = 'anonymous:'..bossimg..i..j end end
-		end
 		lib.boss_default.init(self, x, y, slot, scbg)
+		self._wisys:SetImage(img, nRow, nCol, imgs, anis, intv, a, b)
 		self.ani_intv = inv
 		self.name = name
 	end
@@ -123,12 +107,6 @@ function lib.boss_default:init(x, y, slot, scbg)
 	self.sc_bonus_base = item.sc_bonus_base
 	if scbg then
 		self.bg = New(scbg)
-		local bgrender = self.bg.render
-		self.bg.render = function(self)
-			SetImageState("white", "", Color(255 * self.alpha, 0, 0, 0))
-			RenderRect("white", lstg.world.l, lstg.world.r, lstg.world.b, lstg.world.t)
-			bgrender(self)
-		end
 	end
 	self.aura = New(lib.aura, self)
 	self.pointer = New(lib.pointer, self)
@@ -156,6 +134,7 @@ function lib.boss_default:init(x, y, slot, scbg)
 	self.is_card = false
 	self.t1, self.t2, self.t3 = 0, 0, 0
 	self.card_timer = 0
+	self._wisys = BossWalkImageSystem(self)
 	_log(string.format("[spboss] Boss(%s) Created", self))
 end
 function lib.boss_default:frame()
@@ -187,27 +166,24 @@ function lib.boss_default:frame()
 	SetAttr(self, 'colli', BoxCheck(self, lstg.world.boundl, lstg.world.boundr, lstg.world.boundb, lstg.world.boundt) and self._colli)
 	if self.hp <= 0 then if not(self.killed) then Kill(self) end end
 	task.Do(self)
-	local dx, dy
-	if self.img4 and self.use_up_down_img then
-		if self.dy > 0.5 * SCREEN_SCALE then dy = 2 elseif self.dy < -0.5 * SCREEN_SCALE then dy = -2 else dy = 0 end
-		self.lr = self.lr + dy
-		if self.lr > 28 then self.lr = 28 end
-		if self.lr < -28 then self.lr = -28 end
-		if self.lr == 0 then self.lr = self.lr + dy end
-		if dy == 0 then
-			if self.lr > 1 then self.lr = self.lr - 1 end
-			if self.lr < -1 then self.lr = self.lr + 1 end
-		end
+	local wisys = self._wisys
+	local wis = WalkImageSystem
+	if self.img4 then
+		wisys.mode = 4
+	elseif self.img3 then
+		wisys.mode = 3
+	elseif self.img2 then
+		wisys.mode = 2
+	elseif self.img1 then
+		wisys.mode = 1
 	else
-		if self.dx > 0.5 * SCREEN_SCALE then dx = 2 elseif self.dx < -0.5 * SCREEN_SCALE then dx = -2 else dx = 0 end
-		self.lr = self.lr + dx
-		if self.lr > 28 then self.lr = 28 end
-		if self.lr < -28 then self.lr = -28 end
-		if self.lr == 0 then self.lr = self.lr + dx end
-		if dx == 0 then
-			if self.lr > 1 then self.lr = self.lr - 1 end
-			if self.lr < -1 then self.lr = self.lr + 1 end
-		end
+		wisys.mode = 0
+	end
+	local dy_flag = (self.img4 and self.use_up_down_img)
+	if dy_flag then
+		wis.frame(self, self.dy / SCREEN_SCALE)
+	else
+		wis.frame(self, self.dx / SCREEN_SCALE)
 	end
 	if self.cast_t > 0 then
 		self.cast = self.cast + 1
@@ -215,9 +191,19 @@ function lib.boss_default:frame()
 		self.cast = 0
 		self.cast_t = 0
 	end
-	if self.dx ~= 0 then self.cast = 0 self.cast_t = 0 end
+	if self.dx ~= 0 then
+		self.cast = 0
+		self.cast_t = 0
+	end
+	if BossWalkImageSystem['UpdateImage'..wisys.mode] then
+		BossWalkImageSystem['UpdateImage'..wisys.mode](self)
+	end
+	if dy_flag then
+		local scale = abs(self.hscale)
+		self.hscale = sign(self.lr) * scale
+	end
 	if self.nextimg and #self.nextimg > 0 then
-		if not(self._nextchanget) then self._nextchanget = self.ani_intv -(self.ani % self.ani_intv) end
+		if not(self._nextchanget) then self._nextchanget = self.ani_intv - (self.ani % self.ani_intv) end
 		self._nextchanget = max(0, self._nextchanget - 1)
 		if self._nextchanget <= 0 then 
 			self.img = self.nextimg[1]
@@ -229,150 +215,11 @@ function lib.boss_default:frame()
 			if #self.nextimg == 0 then self.nextimg = nil end
 			self._ischangeimg = false
 		end
-	elseif self.img4 then
-		if self.cast > 0 and self.dx == 0 then
-			if self.cast >= self.ani_intv * self.nn[4] then
-				if self.mm[3] == 1 then
-					self.img = self.img4[self.nn[4]]
-				else
-					self.img = self.img4[int(self.cast / self.ani_intv) % self.mm[3] + self.ani4 + 1]
-				end
-				self.cast_t = self.cast_t - 1
-			else
-				self.img = self.img4[int(self.cast / self.ani_intv) + 1]
-				end
-		elseif self.lr > 0 then
-			if abs(self.lr) == 1 then
-				self.img = self.img1[int(self.ani / self.ani_intv) % self.nn[1] + 1]
-			elseif abs(self.lr) == 28 then
-				if self.mm[1] == 1 then
-					self.img = self.img2[self.nn[2]]
-				else
-					self.img = self.img2[int(self.ani / self.ani_intv) % self.mm[1] + self.ani2 + 1]
-				end
-			else
-				if self.ani2 == 2 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 10) + 1]
-				elseif self.ani2 == 3 then
-					self.img = self.img2[int((abs(self.lr)) / 7) + 1]
-				elseif self.ani2 == 4 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 6) + 1]
-				elseif self.ani2 > 4 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 5) + 1]
-				end
-			end
-		else
-			if abs(self.lr) == 1 then
-				self.img = self.img1[int(self.ani / self.ani_intv) % self.nn[1] + 1]
-			elseif abs(self.lr) == 28 then
-				if self.mm[2] == 1 then
-					self.img = self.img3[self.nn[3]]
-				else
-					self.img = self.img3[int(self.ani / self.ani_intv) % self.mm[2] + self.ani3 + 1]
-				end
-			else
-				if self.ani3 == 2 then
-					self.img = self.img3[int((abs(self.lr) + 2) / 10) + 1]
-				elseif self.ani3 == 3 then
-					self.img = self.img3[int((abs(self.lr)) / 7) + 1]
-				elseif self.ani3 == 4 then
-					self.img = self.img3[int((abs(self.lr) + 2) / 6) + 1]
-				elseif self.ani3>4 then
-					self.img = self.img3[int((abs(self.lr) + 2) / 5) + 1]
-				end
-			end
-		end
-		if self.use_up_down_img then
-			local scale = abs(self.hscale)
-			self.hscale = sign(self.lr) * scale
-		end
-	elseif self.img3 then
-		if self.cast > 0 and self.dx == 0 then
-			if self.cast >= self.ani_intv * self.nn[3] then
-				if self.mm[2] == 1 then
-					self.img = self.img3[self.nn[3]]
-				else
-					self.img = self.img3[int(self.cast / self.ani_intv) % self.mm[2] + self.ani3 + 1]
-				end
-				self.cast_t = self.cast_t - 1
-			else
-				self.img = self.img3[int(self.cast / self.ani_intv) + 1]
-			end
-		elseif self.lr > 0 then
-			if abs(self.lr) == 1 then
-				self.img = self.img1[int(self.ani / self.ani_intv) % self.nn[1] + 1]
-			elseif abs(self.lr) == 28 then
-				if self.mm[1] == 1 then
-					self.img = self.img2[self.nn[2]]
-				else
-					self.img = self.img2[int(self.ani / self.ani_intv) % self.mm[1] + self.ani2 + 1]
-				end
-			else
-				if self.ani2 == 2 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 10) + 1]
-				elseif self.ani2 == 3 then
-					self.img = self.img2[int((abs(self.lr)) / 7) + 1]
-				elseif self.ani2 == 4 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 6) + 1]
-				else
-					self.img = self.img2[int((abs(self.lr) + 2) / 5) + 1]
-				end
-			end
-		else
-			if abs(self.lr) == 1 then
-				self.img = self.img1[int(self.ani / self.ani_intv)%self.nn[1] + 1]
-			elseif abs(self.lr) == 28 then
-				if self.mm[1] == 1 then
-					self.img = self.img2[self.nn[2]]
-				else
-					self.img = self.img2[int(self.ani / self.ani_intv)%self.mm[1] + self.ani2 + 1]
-				end
-			else
-				if self.ani2 == 2 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 10) + 1]
-				elseif self.ani2 == 3 then
-					self.img = self.img2[int((abs(self.lr)) / 7) + 1]
-				elseif self.ani2 == 4 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 6) + 1]
-				else
-					self.img = self.img2[int((abs(self.lr) + 2) / 5) + 1]
-				end
-			end
-		end
-		local scale = abs(self.hscale)
-		self.hscale = sign(self.lr) * scale
-	elseif self.img2 then
-		if self.cast > 0 and self.dx == 0 then
-			if self.cast >= self.ani_intv * self.nn[2] then
-				if self.mm[1] == 1 then
-					self.img = self.img2[self.nn[2]]
-				else
-					self.img = self.img2[int(self.cast / self.ani_intv)%self.mm[1] + self.ani2 + 1]
-				end
-				self.cast_t = self.cast_t - 1
-			else
-				self.img = self.img2[int(self.cast / self.ani_intv) + 1]
-			end
-		else
-			if abs(self.lr) == 1 then
-				self.img = self.img1[1]
-			elseif abs(self.lr) == 28 then
-					self.img = self.img1[self.nn[1]]
-			else
-				if self.ani2 == 2 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 10) + 1]
-				elseif self.ani2 == 3 then
-					self.img = self.img2[int((abs(self.lr)) / 7) + 1]
-				elseif self.ani2 == 4 then
-					self.img = self.img2[int((abs(self.lr) + 2) / 6) + 1]
-				else
-					self.img = self.img2[int((abs(self.lr) + 2) / 5) + 1]
-				end
-			end
-		end
-		local scale = abs(self.hscale)
-		self.hscale = sign(self.lr) * scale
 	end
+	if type(self.A)=='number' and type(self.B)=='number' then
+		self.a=self.A;self.b=self.B
+	end
+	if self.dmgt then self.dmgt = max(0, self.dmgt - 1) end
 	self.pointer_x = self.x
 	if self.bg and IsValid(self.bg) and not(self.no_scbg) then
 		if self.is_card then
@@ -431,32 +278,11 @@ end
 function lib.boss_default:render()
 	if self.ex_card then self.ex_card.render(self) end
 	if self._card_system then self._card_system:render(self) end
-	local dmgt = self.dmgt or 0
-	local c = dmgt / 3
-	if self.img1 or self.nextimg then
-		if self._blend then
-			SetImageState(self.img, self._blend, Color(self._a, self._r - self._r * 0.75 * c, self._g - self._g * 0.75 * c, self._b))
-		else
-			SetImageState(self.img, '', Color(255, 255 - 255 * 0.75 * c, 255 - 255 * 0.75 * c, 255))
-		end
-		Render(self.img, self.x, self.y + sin(self.ani * 4) * 4, self.rot, self.hscale, self.vscale)
-		SetImageState(self.img, '', Color(255, 255, 255, 255))
-	else
-	if self._blend then
-			SetImageState('undefined', self._blend, Color(self._a, self._r - self._r * 0.75 * c, self._g - self._g * 0.75 * c, self._b))
-		else
-			SetImageState('undefined', 'mul+add', Color(128, 255 - 255 * 0.75 * c, 255 - 255 * 0.75 * c, 255))	
-		end
-		Render('undefined', self.x + cos(self.ani * 6 + 180) * 3, self.y + sin(self.ani * 6 + 180) * 3, self.ani * 10)
-		Render('undefined', self.x + cos(-self.ani * 6 + 180) * 3, self.y + sin(-self.ani * 6 + 180) * 3, -self.ani * 10)
-		Render('undefined', self.x + cos(self.ani * 6) * 3, self.y + sin(self.ani * 6) * 3, self.ani * 20)
-		Render('undefined', self.x + cos(-self.ani * 6) * 3, self.y + sin(-self.ani * 6) * 3, -self.ani * 20)
-		SetImageState('undefined', 'mul+add', Color(0x80FFFFFF))	
-	end
+	self._wisys:render(self.dmgt, self.dmgmaxt)
 end
 ---@param dmg number @伤害值
 function lib.boss_default:take_damage(dmg)
-	--self.dmgt = 3
+	if self.dmgmaxt then self.dmgt = self.dmgmaxt end
 	if not(self.protect) and not(self.is_finish) then
 		self.hp = self.hp - dmg * self.dmg_factor * self.DMG_factor
 	end
