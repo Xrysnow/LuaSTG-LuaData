@@ -49,7 +49,7 @@ function save_setting()
 		error(msg)
 	else
 		--f:write(Serialize(cur_setting))--旧方法，但是比较稳定
-		f:write(format_json(Serialize(cur_setting)))--新方法，格式漂亮，未经稳定性测试
+		f:write(format_json(Serialize(cur_setting)))--新方法by Xrysnow
 		f:close()
 	end
 end
