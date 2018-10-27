@@ -284,7 +284,13 @@ end
 if not (lfs.attributes('data.zip')==nil) then
 	LoadPack('data.zip')
 end
-LoadPack('mod\\'..setting.mod..'.zip')
+if setting.mod~='launcher' then
+	LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
+elseif lfs.attributes('launcher.lua')==nil then
+	LoadPack('mod\\'..setting.mod..'.zip')--正常加载启动器
+else
+	--什么也不做
+end
 
 SetSplash(false)
 SetTitle(setting.mod)

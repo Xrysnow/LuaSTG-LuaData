@@ -99,6 +99,7 @@ function RawResetWorld()
 		w[k]=v
 	end
 	lstg.world=w
+	DEFAULT_WORLD=w
 	SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
 end
 
