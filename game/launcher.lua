@@ -48,7 +48,8 @@ function save_setting()
 	if f==nil then
 		error(msg)
 	else
-		f:write(format_json(Serialize(cur_setting)))
+		--f:write(Serialize(cur_setting))--旧方法，但是比较稳定
+		f:write(format_json(Serialize(cur_setting)))--新方法，格式漂亮，未经稳定性测试
 		f:close()
 	end
 end
