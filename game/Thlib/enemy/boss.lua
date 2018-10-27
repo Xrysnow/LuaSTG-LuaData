@@ -128,6 +128,7 @@ function boss:frame()
 		self._wisys.mode = 0
 	end
 	self._wisys:frame()
+	if self.dmgt then self.dmgt = max(0, self.dmgt - 1) end
 	if self.sc_pro>0 then self.sc_pro=self.sc_pro-1 end
 	if abs(self.x)<lstg.world.r then self.ui.pointer_x=self.x else self.ui.pointer_x=nil end--适配宽屏
 	self.aura_alpha=self.aura_alpha+self.aura_alpha_d
@@ -364,10 +365,11 @@ function boss:render()
 	end
 	]=]
 	
-	self._wisys:render()--by OLC，行走图系统
+	self._wisys:render(self.dmgt, self.dmgmaxt)--by OLC，行走图系统
 end
 
 function boss:take_damage(dmg)
+	if self.dmgmaxt then self.dmgt = self.dmgmaxt end
 	if not self.protect then
 		local dmg0=dmg*self.dmg_factor
 		self.spell_damage=self.spell_damage+dmg0
