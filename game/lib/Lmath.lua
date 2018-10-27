@@ -47,8 +47,8 @@ function hypot(x,y)
 	return sqrt(x*x+y*y)
 end
 
-local fac = {}
 --阶乘，目前用于组合数和贝塞尔曲线
+local fac = {}
 function Factorial(num)
 	if num < 0 then
 		error("Can't get factorial of a minus number.")
