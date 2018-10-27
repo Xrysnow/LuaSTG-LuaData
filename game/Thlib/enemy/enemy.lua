@@ -148,6 +148,7 @@ end
 function enemy:frame()
 	enemybase.frame(self)
 	self._wisys:frame()--by OLC，新行走图系统
+	if self.dmgt then self.dmgt = max(0, self.dmgt - 1) end
 	--[=[
 	if self.style<=18 then
 		if self.dx>0.5 then dx=1 elseif self.dx<-0.5 then dx=-1 else dx=0 end
@@ -173,7 +174,7 @@ function enemy:frame()
 end
 
 function enemy:render()
-	self._wisys:render()--by OLC and ETC，新行走图系统
+	self._wisys:render(self.dmgt, self.dmgmaxt)--by OLC and ETC，新行走图系统
 	--[=[
 	if self._blend then
 		SetImgState(self,self._blend,self._a,self._r,self._g,self._b)
@@ -212,6 +213,7 @@ function enemy:render()
 end
 
 function enemy:take_damage(dmg)
+	if self.dmgmaxt then self.dmgt = self.dmgmaxt end
 	if not self.protect then
 		self.hp=self.hp-dmg
 	end
