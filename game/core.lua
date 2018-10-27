@@ -240,6 +240,10 @@ end
 function AfterRender()
 end
 
+function GameExit()
+
+end
+
 ----------------------------------------
 --全局回调函数，底层调用
 
@@ -276,10 +280,6 @@ function FocusLoseFunc()
 end
 
 function FocusGainFunc()
-
-end
-
-function GameExit()
 
 end
 
