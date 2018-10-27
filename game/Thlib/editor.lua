@@ -15,15 +15,21 @@ _object=Class(object)
 function _object:frame()
 	if self.hp<=0 then Kill(self) end
 	task.Do(self)
+	if self.dmgt then self.dmgt = max(0, self.dmgt - 1) end
 end
 function _object:render()
-	SetImgState(self,self._blend,self._a,self._r,self._g,self._b)
+	local c = 0
+	if self.dmgt and self.dmgmaxt then
+		c = self.dmgt / self.dmgmaxt
+	end
+	SetImgState(self, self._blend, obj._a, obj._r - obj._r * 0.75 * c, obj._g - obj._g * 0.75 * c, obj._b)
 	DefaultRenderFunc(self)
 end
 function _object:set_color(blend,a,r,g,b)
 	self._blend,self._a,self._r,self._g,self._b=blend,a,r,g,b
 end
 function _object:take_damage(dmg)
+	if self.dmgmaxt then self.dmgt = self.dmgmaxt end
 	self.hp=self.hp-dmg
 end
 function _object:colli(other)
