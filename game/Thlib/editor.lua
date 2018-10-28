@@ -22,7 +22,7 @@ function _object:render()
 	if self.dmgt and self.dmgmaxt then
 		c = self.dmgt / self.dmgmaxt
 	end
-	SetImgState(self, self._blend, obj._a, obj._r - obj._r * 0.75 * c, obj._g - obj._g * 0.75 * c, obj._b)
+	SetImgState(self, self._blend, self._a, self._r - self._r * 0.75 * c, self._g - self._g * 0.75 * c, self._b)
 	DefaultRenderFunc(self)
 end
 function _object:set_color(blend,a,r,g,b)
