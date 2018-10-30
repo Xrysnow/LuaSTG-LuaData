@@ -273,7 +273,6 @@ function lib.boss_default:frame()
 		lib.ClearBonus(self, "all")
 		self.dropitem = nil
 	end
-	if self.dmgt then self.dmgt = max(self.dmgt - 1, 0) end
 end
 function lib.boss_default:render()
 	if self.ex_card then self.ex_card.render(self) end
@@ -1543,6 +1542,7 @@ end
 ---@param is_final boolean @是否为终符
 function lib.ex_card:do_card_sp(card, bartype, is_final)
 	self.ex_card = card
+	self.current_card = self.ex_card
 	self.cards = {self.ex_card}
 	self.card_num = 1
 	if self.ex_card.name ~= '' then lib.castcard(self, self.ex_card.name) end
@@ -1688,6 +1688,7 @@ function CardSystem:DoCard(boss, card, mode, final)
 		del = card.del
 	}
 	if c.name ~= '' then lib.castcard(self, c.name) end
+	self.current_card = card
 	lib.card.get_init(self, c, mode, final)
 	c.init(self)
 end
