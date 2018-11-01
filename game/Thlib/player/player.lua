@@ -47,7 +47,7 @@ function player_class:init()
 	
 	RunSystem("on_player_init",self)
 	
-	self._wisys = PlayerWalkImageSystem(self, 8)--by OLC，自机行走图系统
+	self._wisys = PlayerWalkImageSystem(self)--by OLC，自机行走图系统
 end
 
 function player_class:frame()
@@ -188,7 +188,7 @@ function player_class:frame()
 	--img
 	---加上time_stop的限制来实现图像时停
 	if not(self._wisys) then
-		self._wisys=PlayerWalkImageSystem(self,8)
+		self._wisys=PlayerWalkImageSystem(self)
 	end
 	if not(self.time_stop) then
 		self._wisys:frame(dx)--by OLC，自机行走图系统
