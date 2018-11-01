@@ -187,6 +187,9 @@ function player_class:frame()
 	end
 	--img
 	---加上time_stop的限制来实现图像时停
+	if not(self._wisys) then
+		self._wisys=PlayerWalkImageSystem(self,8)
+	end
 	if not(self.time_stop) then
 		self._wisys:frame(dx)--by OLC，自机行走图系统
 		
