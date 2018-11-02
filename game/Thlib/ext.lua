@@ -171,6 +171,13 @@ function FrameFunc()
 	return lstg.quit_flag
 end
 
+--判定检测插件文件接口
+if FileExist('CollisionChecker.dat' then
+    LoadPack('CollisionChecker.dat')
+    Include'ColliCheck.lua'
+    Collision_Checker.init()
+end
+
 function RenderFunc()
 	--！更改：只有关卡和object的渲染丢到了if里面，其他的正常每帧渲染
 	SetWorldFlag(1)
@@ -185,6 +192,9 @@ function RenderFunc()
 			SetViewMode'world'
 			DrawCollider()
 		end
+        if Collision_Checker then
+            Collision_Checker.render()
+        end
 		if not stage.current_stage.is_menu then RunSystem("on_stage_render") end
 	end
 	AfterRender()
