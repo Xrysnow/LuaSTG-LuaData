@@ -127,6 +127,10 @@ local BIT_NUMBERS = {
     1
 }
 
+--! @brief 对两个二进制数进行按位与
+--! @param a 第一个参数，十进制表示
+--! @param b 第二个参数，十进制表示
+--! @return 返回布尔值，真则这两个二进制数按位与为真
 function plus.BAND(a, b)
     assert(a >= 0 and a < 4294967296 and b >= 0 and b < 4294967296)
 

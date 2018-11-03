@@ -184,7 +184,8 @@ function ex:LaserFormByList(list,rev)
 		Del(self)
 	end
 	self.data=BentLaserData()
-	self._data=BentLaserData()
+	--防止因_data删除导致老mod内重写的曲光使用该函数出错
+	if self._data then self._data=BentLaserData() end
 	local _l=self._l
 	if rev==nil then
 		for i=l,2,-1 do
@@ -196,7 +197,6 @@ function ex:LaserFormByList(list,rev)
 				self.listy[(self.timer/4)%_l]=self.y
 			end
 			self.data:Update(self,self.l,self.w)
-            --似乎是干掉_data后留下的兼容性接口……
 			if self._data then self._data:Update(self,self.l,self.w+48) end
 		end
 		self.x=list[1].x
@@ -214,7 +214,6 @@ function ex:LaserFormByList(list,rev)
 					self.listy[(self.timer/4)%_l]=self.y
 				end
 				self.data:Update(self,self.l,self.w)
-                --似乎是干掉_data后留下的兼容性接口……
 				if self._data then self._data:Update(self,self.l,self.w+48) end
 		end
 		self.x=list[l].x
@@ -230,7 +229,7 @@ function ex:LaserUpdateByList(list,rev)
 		return
 	end
 	self.data:UpdatePositionByList(list,l,self._w)
-    --似乎是干掉_data后留下的兼容性接口……
+    --兼容性接口
     if self._data then self._data:UpdatePositionByList(list,l,self._w+48) end
 end
 
