@@ -172,7 +172,7 @@ function FrameFunc()
 end
 
 --判定检测插件文件接口
-if FileExist('CollisionChecker.dat' then
+if FileExist('CollisionChecker.dat') then
     LoadPack('CollisionChecker.dat')
     Include'ColliCheck.lua'
     Collision_Checker.init()
