@@ -1,3 +1,10 @@
+--======================================
+--Thlib
+--======================================
+
+----------------------------------------
+--加载脚本
+
 Include'THlib\\misc\\misc.lua'
 Include'THlib\\se\\se.lua'
 Include'THlib\\music\\music.lua'
@@ -26,5 +33,4 @@ local function autorun()
 		Print('自动加载',filename)
 		Include(''..filename)
 	end
-end
-autorun()
+end autorun()

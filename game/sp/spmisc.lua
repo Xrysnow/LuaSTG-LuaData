@@ -169,7 +169,6 @@ end
 ---@param z number @z坐标
 function lib.RenderRing3(img, x, y, r1, r2, n, N, rot, length, blend, color, z)
 	n, N, rot, length, z = n or 1, N or 1, rot or 0, length or 360, z or 0.5
-	blend, color = blend or '', color or Color(0xFFFFFFFF)
 	local da = length / N
 	local dd = da / n
 	if not(lstg.tmpvar.ImgList) then lstg.tmpvar.ImgList = {} end
@@ -179,7 +178,7 @@ function lib.RenderRing3(img, x, y, r1, r2, n, N, rot, length, blend, color, z)
 		lstg.tmpvar.ImgList[img] = true
 	end
 	for d = 1, n do
-		SetImageState(img..d, blend, color)
+		if blend and color then SetImageState(img..d, blend, color) end
 		for i = 1, N do
 			lib.RenderFanShape(img..d, x, y, rot + (i - 1) * da + (d - 1) * dd, rot + (i - 1) * da + d * dd, r1, r2, z)
 		end
@@ -204,7 +203,6 @@ end
 ---@param z number @z坐标
 function lib.RenderRing4(img, x, y, r1, r2, r3, r4, n, N, ang, rot, length, blend, color, z)
 	n, N, ang, rot, length, z = n or 1, N or 1, ang or 0, rot or 0, length or 360, z or 0.5
-	blend, color = blend or '', color or Color(0xFFFFFFFF)
 	local da = length / N
 	local dd = da / n
 	if not(lstg.tmpvar.ImgList) then lstg.tmpvar.ImgList = {} end
@@ -214,7 +212,7 @@ function lib.RenderRing4(img, x, y, r1, r2, r3, r4, n, N, ang, rot, length, blen
 		lstg.tmpvar.ImgList[img] = true
 	end
 	for d = 1, n do
-		SetImageState(img..d, blend, color)
+		if blend and color then SetImageState(img..d, blend, color) end
 		for i = 1, N do
 			lib.RenderFanShape2(img..d, x, y, rot + (i - 1) * da + (d - 1) * dd, rot + (i - 1) * da + d * dd, r1, r2, r3, r4, ang, z)
 		end

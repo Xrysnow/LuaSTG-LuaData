@@ -5,13 +5,51 @@ local GetLastKey=_GetLastKey
 local _key_code_to_name=KeyCodeToName()--Linput
 local setting_item={'resx','resy','windowed','vsync','sevolume','bgmvolume','res'}
 local Resolution={{640,480},{800,600},{960,720},{1024,768},{1280,960}}
+
+function format_json(str)
+	local ret = ''
+	local indent = '	'
+	local level = 0
+	local in_string = false
+	for i = 1, #str do
+		local s = string.sub(str, i, i)
+		if s == '{' and (not in_string) then
+			level = level + 1
+			ret = ret .. '{\n' .. string.rep(indent, level)
+		elseif s == '}' and (not in_string) then
+			level = level - 1
+			ret = string.format(
+					'%s\n%s}', ret, string.rep(indent, level))
+		elseif s == '"' then
+			in_string = not in_string
+			ret = ret .. '"'
+		elseif s == ':' and (not in_string) then
+			ret = ret .. ': '
+		elseif s == ',' and (not in_string) then
+			ret = ret .. ',\n'
+			ret = ret .. string.rep(indent, level)
+		elseif s == '[' and (not in_string) then
+			level = level + 1
+			ret = ret .. '[\n' .. string.rep(indent, level)
+		elseif s == ']' and (not in_string) then
+			level = level - 1
+			ret = string.format(
+					'%s\n%s]', ret, string.rep(indent, level))
+		else
+			ret = ret .. s
+		end
+	end
+	return ret
+end
+
 function save_setting()
 	local f,msg
 	f,msg=io.open('setting','w')
 	if f==nil then
 		error(msg)
 	else
-		f:write(Serialize(cur_setting))
+		--f:write(Serialize(cur_setting))--旧方法，但是比较稳定
+		f:write(format_json(Serialize(cur_setting)))--新方法by Xrysnow
 		f:close()
 	end
 end

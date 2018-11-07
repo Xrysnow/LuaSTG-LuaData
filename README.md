@@ -1,1 +1,3 @@
-<div><span style="font-size: 18px;"><b>[介绍]</b></span></div><div>LuaSTG ex+0.81测试版data<br />LuaSTG ex+0.81测试版editor<br />仅包含必要的lua脚本、fx着色器脚本、launch等文件</div>
+[介绍]  
+LuaSTG ex+0.81测试版data  
+仅包含必要的lua脚本、fx着色器脚本、launch等文件

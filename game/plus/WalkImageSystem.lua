@@ -25,10 +25,16 @@ function WalkImageSystem:frame(dx)
         if obj.lr < -1 then obj.lr = obj.lr + 1 end
     end
 end
-function WalkImageSystem:render()
+function WalkImageSystem:render(dmgt, dmgmaxt)
     local obj = self.obj
+    local c = 0
+    if dmgt and dmgmaxt then
+        c = dmgt / dmgmaxt
+    end
     if obj._blend and obj._a and obj._r and obj._g and obj._b then
-        SetImageState(obj.img, obj._blend, Color(obj._a, obj._r, obj._g, obj._b))
+        SetImageState(obj.img, obj._blend, Color(obj._a, obj._r - obj._r * 0.75 * c, obj._g - obj._g * 0.75 * c, obj._b))
+    else
+        SetImageState(obj.img, '', Color(255, 255 - 255 * 0.75 * c, 255 - 255 * 0.75 * c, 255))
     end
     Render(obj.img, obj.x, obj.y, obj.rot, obj.hscale, obj.vscale)
     if obj._blend and obj._a and obj._r and obj._g and obj._b then
@@ -66,11 +72,18 @@ function BossWalkImageSystem:frame()
         obj.a=obj.A;obj.b=obj.B
     end
 end
-function BossWalkImageSystem:render()
+function BossWalkImageSystem:render(dmgt, dmgmaxt)
+
     local obj = self.obj
+    local c = 0
+    if dmgt and dmgmaxt then
+        c = dmgt / dmgmaxt
+    end
     if self.mode == 0 then
         if obj._blend and obj._a and obj._r and obj._g and obj._b then
-            SetImageState('undefined', obj._blend, Color(obj._a, obj._r, obj._g, obj._b))
+            SetImageState('undefined', obj._blend, Color(obj._a, obj._r - obj._r * 0.75 * c, obj._g - obj._g * 0.75 * c, obj._b))
+        else
+            SetImageState('undefined', 'mul+add', Color(128, 255 - 255 * 0.75 * c, 255 - 255 * 0.75 * c, 255))
         end
         Render('undefined',obj.x+cos( obj.ani*6+180)*3,obj.y+sin( obj.ani*6+180)*3, obj.ani*10)
         Render('undefined',obj.x+cos(-obj.ani*6+180)*3,obj.y+sin(-obj.ani*6+180)*3,-obj.ani*10)
@@ -80,7 +93,7 @@ function BossWalkImageSystem:render()
             SetImageState('undefined', 'mul+add', Color(0x80FFFFFF))
         end
     else
-        WalkImageSystem.render(self)
+        WalkImageSystem.render(self, dmgt, dmgmaxt)
     end
 end
 function BossWalkImageSystem:SetImage(img, nRow, nCol, imgs, anis, intv, a, b)
@@ -291,10 +304,16 @@ function EnemyWalkImageSystem:frame()
         obj.a=obj.A;obj.b=obj.B
     end
 end
-function EnemyWalkImageSystem:render()
+function EnemyWalkImageSystem:render(dmgt, dmgmaxt)
     local obj = self.obj
+    local c = 0
+    if dmgt and dmgmaxt then
+        c = dmgt / dmgmaxt
+    end
     if obj._blend and obj._a and obj._r and obj._g and obj._b then
-        SetImgState(obj, obj._blend, obj._a, obj._r, obj._g, obj._b)
+        SetImgState(obj, obj._blend, obj._a, obj._r - obj._r * 0.75 * c, obj._g - obj._g * 0.75 * c, obj._b)
+    else
+        SetImgState(obj, '', 255, 255 - 255 * 0.75 * c, 255 - 255 * 0.75 * c, 255)
     end
     
     if obj.aura then
