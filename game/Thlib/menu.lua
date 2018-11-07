@@ -2,7 +2,7 @@ menu={}
 
 function menu:FlyIn(dir)
 	self.alpha=1
-	if dir=='left' then self.x=screen.width*0.5-700 elseif dir=='right' then self.x=screen.width*0.5+700 end
+	if dir=='left' then self.x=screen.width*0.5-screen.width elseif dir=='right' then self.x=screen.width*0.5+screen.width end
 	task.Clear(self)
 	task.New(self,function()
 		task.MoveTo(screen.width*0.5,self.y,30,2)
@@ -12,7 +12,7 @@ end
 
 function menu:FlyOut(dir)
 	local x
-	if dir=='left' then x=screen.width*0.5-700 elseif dir=='right' then x=screen.width*0.5+700 end
+	if dir=='left' then x=screen.width*0.5-screen.width elseif dir=='right' then x=screen.width*0.5+screen.width end
 	task.Clear(self)
 	if not self.locked then
 		task.New(self,function()
@@ -61,7 +61,7 @@ function sc_pr_menu:init(exit_func)
 	self.group=GROUP_GHOST
 	self.alpha=1
 	self.exit_func=exit_func
-	self.x=screen.width*0.5+512 self.y=screen.height*0.5
+	self.x=screen.width*0.5+screen.width self.y=screen.height*0.5
 	self.bound=false
 	self.locked=true
 	self.npage=max(int((#_sc_table-1)/ui.menu.sc_pr_line_per_page)+1,1)
@@ -133,7 +133,7 @@ function simple_menu:init(title,content,keyslot,offx)
 	self.group=GROUP_GHOST
 	self.alpha=1
 	self.offx=offx or 0
-	self.x=screen.width*0.5-448-300 self.y=screen.height*0.5
+	self.x=screen.width*0.5-screen.width self.y=screen.height*0.5
 	self.bound=false
 	self.locked=true
 	self.title=title
@@ -240,16 +240,16 @@ end
 ------------------replay_saver-------------------------
 local _keyboard={}
 do
-  for i=65,90 do table.insert(_keyboard,i) end
-  for i=97,122 do table.insert(_keyboard,i) end
-  for i=48,57 do table.insert(_keyboard,i) end
-  for _,i in ipairs({43,45,61,46,44,33,63,64,58,59,91,93,40,41,95,47,123,125,124,126,94}) do
-    table.insert(_keyboard,i)
-  end
-  for i=35,38 do table.insert(_keyboard,i) end
-  for _,i in ipairs({42,92,127,34}) do
-    table.insert(_keyboard,i)
-  end
+	for i=65,90 do table.insert(_keyboard,i) end
+	for i=97,122 do table.insert(_keyboard,i) end
+	for i=48,57 do table.insert(_keyboard,i) end
+	for _,i in ipairs({43,45,61,46,44,33,63,64,58,59,91,93,40,41,95,47,123,125,124,126,94}) do
+		table.insert(_keyboard,i)
+	end
+	for i=35,38 do table.insert(_keyboard,i) end
+	for _,i in ipairs({42,92,127,34}) do
+		table.insert(_keyboard,i)
+	end
 end
 
 replay_saver = Class(object)
@@ -258,7 +258,7 @@ function replay_saver:init(stages, finish, exitCallback)
 	self.layer = LAYER_TOP
 	self.group = GROUP_GHOST
 	self.bound = false
-	self.x = screen.width * 0.5 - 700
+	self.x = screen.width * 0.5 - screen.width
 	self.y = screen.height * 0.5
 
 	self.locked = true
@@ -459,7 +459,7 @@ function replay_loader:init(exitCallback)
 	self.layer = LAYER_TOP
 	self.group = GROUP_GHOST
 	self.bound = false
-	self.x = screen.width * 0.5 + 700
+	self.x = screen.width * 0.5 + screen.width
 	self.y = screen.height * 0.5
 
 	-- 是否可操作
