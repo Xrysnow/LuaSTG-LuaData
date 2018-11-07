@@ -102,6 +102,15 @@ function GetLastKey(id)
 	end
 end
 
+function KeyIsDown(key,id)
+	if id then
+		return jstg.keys[id][key]
+	else
+		return KeyState[key]
+	end
+end
+KeyPress = KeyIsDown
+
 function KeyIsPressed(key,id)
 	if id then
 		return jstg.keys[id][key] and (not jstg.keypres[id][key])
@@ -109,7 +118,7 @@ function KeyIsPressed(key,id)
 		return KeyState[key] and (not KeyStatePre[key])
 	end
 end
-
+KeyTrigger = KeyIsPressed
 
 function jstg.GetLocalPlayerIndexs()
 	local p={}
@@ -227,8 +236,14 @@ function jstg.GetInputEx(is_pause)
 	end
 	--get system input
 	KeyStatePre = {}
-	KeyState = jstg.KeyState
-	for k, v in pairs(jstg.syskey) do
+	KeyState = {}
+	jstg.KeyState = KeyState
+	for i=1,jstg.inputcount do
+		for k, v in pairs(jstg.keys[i]) do
+			if v then KeyState[k] = v end
+		end
+	end
+	for k, v in pairs(KeyState) do
 		KeyStatePre[k] = KeyState[k]
 	end
 	--update and get last key
@@ -244,7 +259,7 @@ function jstg.GetInputEx(is_pause)
 					jstg.LastKey=0
 				end
 			end
-			KeyState[k]=t
+			--KeyState[k]=t
 		end
 	end
 	--compatible old stage replay
