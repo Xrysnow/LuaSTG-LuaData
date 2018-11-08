@@ -236,17 +236,11 @@ function jstg.WrongGetInputEx(is_pause)--草死，这样改非玩家按键部分
 	end
 	--get system input
 	KeyStatePre = {}
-	KeyState = {}
-	jstg.KeyState = KeyState
-	for i=1,jstg.inputcount do
-		for k, v in pairs(jstg.keys[i]) do
-			if v then KeyState[k] = v end
-		end
-	end
-	for k, v in pairs(KeyState) do
+	KeyState = jstg.KeyState
+	--update and get last key
+	for k, v in pairs(jstg.syskey) do
 		KeyStatePre[k] = KeyState[k]
 	end
-	--update and get last key
 	jstg.LastKey=0
 	for k, v in pairs(jstg.syskey) do
 		local t = GetVKeyStateEx(0,jstg.syskey[k])
@@ -259,7 +253,15 @@ function jstg.WrongGetInputEx(is_pause)--草死，这样改非玩家按键部分
 					jstg.LastKey=0
 				end
 			end
-			--KeyState[k]=t
+			KeyState[k]=t
+		end
+	end
+	for k, v in pairs(setting.keys) do
+		KeyState[k] = false
+	end
+	for i=1,jstg.inputcount do
+		for k, v in pairs(jstg.keys[i]) do
+			KeyState[k] = v or KeyState[k]
 		end
 	end
 	--compatible old stage replay
