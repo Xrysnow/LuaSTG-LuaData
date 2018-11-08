@@ -87,6 +87,7 @@ function boss:init(x,y,name,cards,bg,dif)
 	lstg.tmpvar.boss=self
 end
 
+--！警告：潜在的多玩家适配问题
 function boss:frame()
 	--
 	SetAttr(self,'colli',BoxCheck(self,lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt) and self._colli)
@@ -171,7 +172,7 @@ function boss:frame()
 			self.hp=0
 			self.timeout=1
 		end
-		if c.is_extra and lstg.player.nextspell>0 then--！警告：潜在的多玩家适配问题
+		if c.is_extra and lstg.player.nextspell>0 then
 			self.dmg_factor=0
 		end
 		if c.t1==c.t3 then--耐久或者正常
@@ -251,25 +252,7 @@ function boss:kill()
 	self.sp_point={}
 	--boss ex
 	if self.ex then
-		if self.ex.status==1 then
-			local c=self.ex.cards[self.ex.nextcard]
-			self.ex.lifes[self.ex.nextcard]=0
-			self.ex.nextcard=self.ex.nextcard-1
-			c.del(self)
-			boss.PopSpellResult(self,c)
-			PreserveObject(self)
-			self.hp=9999
-			task.Clear(self)
-			self.ex.status=0
-		else
-			task.Clear(self.ex)
-			if self.ui then Del(self.ui) end
-			if self.bg then Del(self.bg) self.bg=nil end
-			if self.dialog_displayer then Del(self.dialog_displayer) end
-			if lstg.tmpvar.bg then lstg.tmpvar.bg.hide=false end
-			if self.class.defeat then self.class.defeat(self) end
-			ex.RemoveBoss(self)
-		end
+		boss.killex(self)
 		return--为boss ex时，不执行下方的逻辑
 	end
 	--执行boss行为的末尾处理
@@ -291,12 +274,7 @@ function boss:kill()
 	if self._cardsys:next(self) then--切换到下一个行为
 		PreserveObject(self)
 	else--没有下一个行为了，清除自身和附属的组件
-		if self.ui then Del(self.ui) end
-		if self.bg then Del(self.bg) self.bg=nil end
-		if self.dialog_displayer then Del(self.dialog_displayer) end
-		if lstg.tmpvar.bg then lstg.tmpvar.bg.hide=false end
-		if self.class.defeat then self.class.defeat(self) end
-		ex.RemoveBoss(self)
+		boss.del(self)
 	end
 end
 
@@ -308,6 +286,7 @@ function boss:del()
 	if self.bg then Del(self.bg) self.bg=nil end
 	if self.dialog_displayer then Del(self.dialog_displayer) end
 	if lstg.tmpvar.bg then lstg.tmpvar.bg.hide=false end
+	if self.class.defeat then self.class.defeat(self) end
 	ex.RemoveBoss(self)
 end
 
@@ -395,6 +374,22 @@ function boss:cast(cast_t)
 end
 
 --boss ex
+
+function boss:killex()
+	if self.ex.status==1 then
+		local c=self.ex.cards[self.ex.nextcard]
+		self.ex.lifes[self.ex.nextcard]=0
+		self.ex.nextcard=self.ex.nextcard-1
+		c.del(self)
+		boss.PopSpellResult(self,c)
+		PreserveObject(self)
+		self.hp=9999
+		task.Clear(self)
+		self.ex.status=0
+	else
+		boss.del(self)
+	end
+end
 
 function boss:prepareSpellCards(cardlist)
 	if self.ex==nil then return end
