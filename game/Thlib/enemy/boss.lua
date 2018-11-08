@@ -47,7 +47,7 @@ function boss:init(x,y,name,cards,bg,dif)
 	--boss ui
 	self.ui=New(boss_ui,self)
 	self.ui.name=name or ''
-	self.ui.sc_left=0
+	self.ui.sc_left=0--会在SpellCardSystem中再初始化一次
 	self.lifepoint=160--血条分割
 	self.hp_flag=0--player靠近boss时ui透明度降低
 	self.sp_point={}--阶段点
@@ -64,9 +64,6 @@ function boss:init(x,y,name,cards,bg,dif)
 	--boss卡背
 	self.bg=bg
 	--boss移动、对话、非符、符卡
-	self.cards=cards
-	self.card_num=0
-	self.last_card=1
 	self.timeout=0--全避
 	self._cardsys=SpellCardSystem(self, cards)--by OLC,boss符卡系统
 	--boss行走图
@@ -331,7 +328,6 @@ function boss:PopSpellResult(c)--弹出提示文字等
 						scoredata.spell_card_hist[lstg.var.player_name][self.difficulty][c.name][1]=scoredata.spell_card_hist[lstg.var.player_name][self.difficulty][c.name][1]+1
 					end
 					self.spell_get=true
-
 				else
 					New(hinter,'hint.bonusfail',0.6,0,112,15,120)
 					New(kill_timer,0,60,self.timer)
@@ -352,7 +348,6 @@ function boss:PopSpellResult(c)--弹出提示文字等
 				New(bullet_killer,p.x,p.y,true)
 			end
 		end
-		--New(bullet_killer,lstg.player.x,lstg.player.y,true)
 	end
 	if c.is_sc then self.ui.sc_left=self.ui.sc_left-1 end
 end
@@ -851,7 +846,7 @@ function boss_ui:render()
 			if self.drawname then
 				RenderTTF('boss_name',self.name,-185,-185,222-dy1,222-dy1,Color(0xFF000000),'noclip')
 				RenderTTF('boss_name',self.name,-186,-186,223-dy1,223-dy1,Color(0xFF80FF80),'noclip')
-			local m = int((self.sc_left-1)/8)
+				local m = int((self.sc_left-1)/8)
 				if m >= 0 then
 					for i=0,m-1 do
 						for j=1,8 do
@@ -905,11 +900,11 @@ function boss_ui:render()
 			SetFontState('bonus','',Color(alpha*255,0,0,0))
 			RenderText('bonus',b,187+xoffset,207-dy2,0.5,'right')
 			RenderText('bonus',string.format('%d/%d',self.sc_hist[1],self.sc_hist[2]),97+xoffset,207-dy2,0.5,'right')
-			RenderText('bonus','HISTORY	   BONUS',137+xoffset,207-dy2,0.5,'right')
+			RenderText('bonus','HISTORY      BONUS',137+xoffset,207-dy2,0.5,'right')
 			SetFontState('bonus','',Color(alpha*255,255,255,255))
 			RenderText('bonus',b,186+xoffset,208-dy2,0.5,'right')
 			RenderText('bonus',string.format('%d/%d',self.sc_hist[1],self.sc_hist[2]),96+xoffset,208-dy2,0.5,'right')
-			RenderText('bonus','HISTORY	   BONUS',136+xoffset,208-dy2,0.5,'right')
+			RenderText('bonus','HISTORY      BONUS',136+xoffset,208-dy2,0.5,'right')
 		end
 	end
 	--非符、符卡时间
@@ -1286,14 +1281,14 @@ SpellCardSystem = plus.Class()
 function SpellCardSystem:init(boss, cards)
 	boss.cards = cards
 	boss.card_num = 0
-	boss.sc_left = 0
+	boss.ui.sc_left = 0
 	boss.last_card = 0
 	for i = 1, #boss.cards do
 		if boss.cards[i].is_combat then
 			boss.last_card = i
 		end
 		if boss.cards[i].is_sc then
-			boss.sc_left = boss.sc_left + 1
+			boss.ui.sc_left = boss.ui.sc_left + 1
 		end
 	end
 end
