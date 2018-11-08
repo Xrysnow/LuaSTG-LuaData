@@ -288,8 +288,7 @@ function boss:kill()
 		end
 	end
 	--boss行为更新
-	local ref=self._cardsys:next(self)
-	if ref then--切换到下一个行为
+	if self._cardsys:next(self) then--切换到下一个行为
 		PreserveObject(self)
 	else--没有下一个行为了，清除自身和附属的组件
 		if self.ui then Del(self.ui) end
