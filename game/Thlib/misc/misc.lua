@@ -260,18 +260,19 @@ function mask_fader:init(mode)
 	self.open=(mode=='open')
 end
 function mask_fader:frame()
-	if self.timer==30 then
+	if self.timer>30 then
 		Del(self)
 	end
 end
 function mask_fader:render()
 	SetViewMode'ui'
 	if self.open then
-		SetImageState('white','',Color(255-self.timer*8.5,0,0,0))
+		SetImageState('white','',Color(max(0,min(255,255-self.timer*8.5)),0,0,0))
 	else
-		SetImageState('white','',Color(self.timer*8.5,0,0,0))
+		SetImageState('white','',Color(max(0,min(255,self.timer*8.5)),0,0,0))
 	end
 	RenderRect('white',0,screen.width,0,screen.height)
+	SetViewMode'world'
 end
 
 --维持粒子特效直到消失

@@ -13,6 +13,12 @@ local extpath="Thlib\\ext\\"
 DoFile(extpath.."ext_pause_menu.lua")--暂停菜单和暂停菜单资源
 DoFile(extpath.."ext_replay.lua")--CHU爷爷的replay系统以及切关函数重载
 DoFile(extpath.."ext_stage_group.lua")--关卡组
+--判定检测插件文件接口
+if FileExist('CollisionChecker.dat') then
+	LoadPack('CollisionChecker.dat')
+	Include'ColliCheck.lua'
+	Collision_Checker.init()
+end
 
 ext.replayTicker=0--控制录像速度时有用
 ext.slowTicker=0--控制时缓的变量
@@ -171,30 +177,23 @@ function FrameFunc()
 	return lstg.quit_flag
 end
 
---判定检测插件文件接口
-if FileExist('CollisionChecker.dat') then
-    LoadPack('CollisionChecker.dat')
-    Include'ColliCheck.lua'
-    Collision_Checker.init()
-end
-
 function RenderFunc()
 	--！更改：只有关卡和object的渲染丢到了if里面，其他的正常每帧渲染
-	SetWorldFlag(1)
 	BeginScene()
+	SetWorldFlag(1)
 	BeforeRender()
-	if stage.current_stage.timer and stage.current_stage.timer > 1 and stage.next_stage == nil then
+	if stage.current_stage.timer and stage.current_stage.timer >= 0 and stage.next_stage == nil then
 		stage.current_stage:render()
 		for i=1,#jstg.worlds do
 			jstg.SwitchWorld(i)
 			SetWorldFlag(jstg.worlds[i].world)
 			ObjRender()
-			SetViewMode'world'
+			SetViewMode('world')
 			DrawCollider()
 		end
-        if Collision_Checker then
-            Collision_Checker.render()
-        end
+		if Collision_Checker then
+			Collision_Checker.render()
+		end
 		if not stage.current_stage.is_menu then RunSystem("on_stage_render") end
 	end
 	AfterRender()

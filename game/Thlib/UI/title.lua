@@ -5,7 +5,7 @@ function stage_init:init()
 	jstg.worldcount=1 --do not render twice
 end
 function stage_init:frame()
-	if --[[KeyIsDown'shoot' and ]]self.timer>30 then stage.Set('none', 'menu') end
+	if self.timer>=30 then stage.Set('none', 'menu') end
 end
 function stage_init:render()
 	ui.DrawMenuBG()
@@ -364,8 +364,6 @@ function stage_menu:init()
 		self.pos_changed=ui.menu.shake_time
 	end
 	
-	LoadMusic('menu',music_list.menu[1],music_list.menu[2],music_list.menu[3])
-	PlayMusic('menu')
 	jstg.menu_network=menu_network
 	jstg.menu_title=menu_title
 	
@@ -393,8 +391,13 @@ function stage_menu:init()
 			task.New(stage_menu,task_menu_init)
 		end
 	end
+	
+	task.New(self,function()--延迟几帧加载bgm避免奇怪的黑块问题
+		task.Wait(1)
+		LoadMusic('menu',music_list.menu[1],music_list.menu[2],music_list.menu[3])
+		PlayMusic('menu')
+	end)
 end
-
 function stage_menu:render()
 	ui.DrawMenuBG()
 end
