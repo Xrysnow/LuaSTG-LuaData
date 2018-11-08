@@ -238,10 +238,12 @@ function ResetUI()
 		LoadImageFromFile('menu_bg','THlib\\ui\\menu_bg.png')
 
 		function ui.DrawFrame()
+			SetViewMode'ui'
 			if CheckRes('img','image:UI_img') then Render('image:UI_img',320,240) else Render('ui_bg',320,240) end
 			if CheckRes('img','image:LOGO_img') then Render('image:LOGO_img',400,150,0,0.5,0.5) else Render('logo',400,150,0,0.5,0.5) end
 			SetFontState('menu','',Color(0xFFFFFFFF))
 			RenderText('menu',string.format('%.1ffps',GetFPS()),636,1,0.25,'right','bottom')
+			SetViewMode'world'
 		end
 
 		function ui.DrawMenuBG()
@@ -249,8 +251,10 @@ function ResetUI()
 			Render('menu_bg',320,240)
 			SetFontState('menu','',Color(0xFFFFFFFF))
 			RenderText('menu',string.format('%.1ffps',GetFPS()),636,1,0.25,'right','bottom')
+			SetViewMode'world'
 		end
 		function ui.DrawScore()
+			SetViewMode'ui'
 			SetFontState('score3','',Color(0xFFADADAD))
 			local diff=string.match(stage.current_stage.name,"[%w_][%w_ ]*$")
 			local diffimg=CheckRes('img','image:diff_'..diff)
@@ -322,6 +326,7 @@ function ResetUI()
 			RenderText('score2',string.format('%d,%d%d%d',math.floor(lstg.var.pointrate/1000),math.floor(lstg.var.pointrate/100)%10,math.floor(lstg.var.pointrate/10)%10,lstg.var.pointrate%10),610,239,0.4,'right')
 			SetFontState('score3','',Color(0xFFADADAD))
 			RenderText('score3',string.format('%d',lstg.var.graze),610,216,0.4,'right')
+			SetViewMode'world'
 		end
 	else
 		LoadImageFromFile('ui_bg2','THlib\\ui\\ui_bg_2.png')
@@ -331,7 +336,9 @@ function ResetUI()
 		LoadImageFromFile('menu_bg2','THlib\\ui\\menu_bg_2.png')
 		LoadImageFromFile('menu_bg','THlib\\ui\\menu_bg.png')
 		function ui.DrawFrame()
+			SetViewMode'ui'
 			Render('ui_bg2',198,264)
+			SetViewMode'world'
 		end
 
 		function ui.DrawMenuBG()
@@ -339,9 +346,11 @@ function ResetUI()
 			Render('menu_bg2',198,264)
 			SetFontState('menu','',Color(0xFFFFFFFF))
 			RenderText('menu',string.format('%.1ffps',GetFPS()),392,1,0.25,'right','bottom')
+			SetViewMode'world'
 		end
 
 		function ui.DrawScore()
+			SetViewMode'ui'
 			RenderText('score','HiScore',8,520,0.5,'left','top')
 			RenderText('score',string.format('%d',max(lstg.tmpvar.hiscore or 0,lstg.var.score)),190,520,0.5,'right','top')
 			RenderText('score','Score',206,520,0.5,'left','top')
@@ -356,6 +365,7 @@ function ResetUI()
 			RenderText('score',string.format('%d',lstg.var.graze),236,496,0.5,'left','top')
 			RenderText('score',string.rep('*',max(0,lstg.var.lifeleft)),388,496,0.5,'right','top')
 			RenderText('score',string.rep('*',max(0,lstg.var.bomb)),380,490,0.5,'right','top')
+			SetViewMode'world'
 		end
 	end
 end

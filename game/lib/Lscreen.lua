@@ -199,11 +199,13 @@ function SetViewMode(mode)
 	--lstg.scale_3d=((((lstg.view3d.eye[1]-lstg.view3d.at[1])^2+(lstg.view3d.eye[2]-lstg.view3d.at[2])^2+(lstg.view3d.eye[3]-lstg.view3d.at[3])^2)^0.5)*2*math.tan(lstg.view3d.fovy*0.5))/(lstg.world.scrr-lstg.world.scrl)
 	if mode=='3d' then
 		SetViewport(lstg.world.scrl*screen.scale+screen.dx,lstg.world.scrr*screen.scale+screen.dx,lstg.world.scrb*screen.scale+screen.dy,lstg.world.scrt*screen.scale+screen.dy)
-		SetPerspective(lstg.view3d.eye[1],lstg.view3d.eye[2],lstg.view3d.eye[3],
-					   lstg.view3d.at[1],lstg.view3d.at[2],lstg.view3d.at[3],
-					   lstg.view3d.up[1],lstg.view3d.up[2],lstg.view3d.up[3],
-					   lstg.view3d.fovy,(lstg.world.r-lstg.world.l)/(lstg.world.t-lstg.world.b),
-					   lstg.view3d.z[1],lstg.view3d.z[2])
+		SetPerspective(
+			lstg.view3d.eye[1],lstg.view3d.eye[2],lstg.view3d.eye[3],
+			lstg.view3d.at[1],lstg.view3d.at[2],lstg.view3d.at[3],
+			lstg.view3d.up[1],lstg.view3d.up[2],lstg.view3d.up[3],
+			lstg.view3d.fovy,(lstg.world.r-lstg.world.l)/(lstg.world.t-lstg.world.b),
+			lstg.view3d.z[1],lstg.view3d.z[2]
+		)
 		SetFog(lstg.view3d.fog[1],lstg.view3d.fog[2],lstg.view3d.fog[3])
 		SetImageScale(((((lstg.view3d.eye[1]-lstg.view3d.at[1])^2+(lstg.view3d.eye[2]-lstg.view3d.at[2])^2+(lstg.view3d.eye[3]-lstg.view3d.at[3])^2)^0.5)*2*math.tan(lstg.view3d.fovy*0.5))/(lstg.world.scrr-lstg.world.scrl))
 	elseif mode=='world' then
@@ -212,7 +214,8 @@ function SetViewMode(mode)
 		SetFog()
 		SetImageScale((lstg.world.r-lstg.world.l)/(lstg.world.scrr-lstg.world.scrl))
 	elseif mode=='ui' then
-		SetOrtho(0.5,screen.width+0.5,-0.5,screen.height-0.5)
+		--SetOrtho(0.5,screen.width+0.5,-0.5,screen.height-0.5)--f2d底层已经有修正
+		SetOrtho(0,screen.width,0,screen.height)
 		SetViewport(screen.dx,screen.width*screen.scale+screen.dx,screen.dy,screen.height*screen.scale+screen.dy)
 		SetFog()
 		SetImageScale(1)

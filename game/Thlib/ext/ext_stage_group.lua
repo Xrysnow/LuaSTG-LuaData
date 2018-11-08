@@ -201,13 +201,13 @@ end
 
 function stage.group.render(self)
 	SetViewMode'ui'
-	RenderClear(Color(0x00000000))
+	RenderClear(Color(255,0,0,0))
 	ui.DrawFrame()
 	if lstg.var.init_player_data then
 		ui.DrawScore()
 	end
 	SetViewMode'world'
-	RenderClear(Color(0x00000000))
+	RenderClear(Color(255,0,0,0))
 end
 
 function stage.group.Start(group)
