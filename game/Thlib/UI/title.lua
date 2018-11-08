@@ -392,7 +392,7 @@ function stage_menu:init()
 		end
 	end
 	
-	task.New(self,function()--延迟几帧加载bgm避免奇怪的黑块问题
+	task.New(self,function()--延迟几帧加载bgm避免奇怪的黑块问题--然并乱，草死
 		task.Wait(1)
 		LoadMusic('menu',music_list.menu[1],music_list.menu[2],music_list.menu[3])
 		PlayMusic('menu')
