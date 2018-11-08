@@ -224,7 +224,7 @@ function jstg.SysVKey2Key(vkey)
 	return 0
 end
 
-function jstg.GetInputEx(is_pause)
+function jstg.WrongGetInputEx(is_pause)--草死，这样改非玩家按键部分获取不了输入了
 	--get players input
 	for i=1,jstg.inputcount do
 		KeyStatePre = {}
@@ -260,6 +260,51 @@ function jstg.GetInputEx(is_pause)
 				end
 			end
 			--KeyState[k]=t
+		end
+	end
+	--compatible old stage replay
+	if ext.replay.IsReplay() and jstg.enable_player==false then
+		KeyState=jstg.OldKeyState
+		KeyStatePre = {}
+		for k, v in pairs(setting.keys) do
+			KeyStatePre[k] = KeyState[k]
+			KeyState[k] = jstg.keys[1][k]
+		end
+	end
+end
+
+function jstg.GetInputEx(is_pause)
+	--get players input
+	for i=1,jstg.inputcount do
+		KeyStatePre = {}
+		KeyState = jstg.keys[i]
+		jstg.GetInputSingleEx(i,is_pause)
+		for k, v in pairs(setting.keys) do
+			jstg.keypres[i][k] = KeyStatePre[k]
+		end
+	end
+	--get system input
+	--！！警告：jstg.KeyState一直是空的草
+	KeyStatePre = {}
+	KeyState = jstg.KeyState
+	for k, v in pairs(jstg.syskey) do
+		KeyStatePre[k] = KeyState[k]
+	end
+	--update and get last key
+	--！！警告：lastkey虽然正常，但是还是有问题
+	jstg.LastKey=0
+	for k, v in pairs(jstg.syskey) do
+		local t = GetVKeyStateEx(0,jstg.syskey[k])
+		if t~= KeyState[k] then
+			local s=jstg.SysVKey2Key(v)
+			if t then
+				jstg.LastKey=s
+			else
+				if s==jstg.LastKey then
+					jstg.LastKey=0
+				end
+			end
+			KeyState[k]=t
 		end
 	end
 	--compatible old stage replay
