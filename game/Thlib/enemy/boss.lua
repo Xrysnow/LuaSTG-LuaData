@@ -121,17 +121,6 @@ function boss:frame()
 	--执行自身task
 	task.Do(self)
 	--by OLC，行走图系统
-	if self.img4 then
-		self._wisys.mode = 4
-	elseif self.img3 then
-		self._wisys.mode = 3
-	elseif self.img2 then
-		self._wisys.mode = 2
-	elseif self.img1 then
-		self._wisys.mode = 1
-	else
-		self._wisys.mode = 0
-	end
 	self._wisys:frame()
 	--受击闪烁
 	if self.dmgt then self.dmgt = max(0, self.dmgt - 1) end
