@@ -385,6 +385,3 @@ SetImageState('_sub_white','mul+sub',
 	Color(255,0,0,0),
 	Color(255,0,0,0)
 )
---不再使用
---LoadImage('boss_aura','misc',0,128,128,128)
---SetImageState('boss_aura','mul+add',Color(0x80FFFFFF))
