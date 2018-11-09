@@ -224,7 +224,7 @@ function jstg.SysVKey2Key(vkey)
 	return 0
 end
 
-function jstg.WrongGetInputEx(is_pause)--草死，这样改非玩家按键部分获取不了输入了
+function jstg.GetInputEx(is_pause)--OLC提供的一个解决方法，解决了非自机输入在rep中检测不到的问题
 	--get players input
 	for i=1,jstg.inputcount do
 		KeyStatePre = {}
@@ -275,7 +275,7 @@ function jstg.WrongGetInputEx(is_pause)--草死，这样改非玩家按键部分
 	end
 end
 
-function jstg.GetInputEx(is_pause)
+function jstg.OldGetInputEx(is_pause)--旧方法的备份
 	--get players input
 	for i=1,jstg.inputcount do
 		KeyStatePre = {}
