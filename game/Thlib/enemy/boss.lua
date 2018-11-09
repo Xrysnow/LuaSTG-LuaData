@@ -883,11 +883,11 @@ function boss_ui:render()
 			SetFontState('bonus','',Color(alpha*255,0,0,0))
 			RenderText('bonus',b,187+xoffset,207-dy2,0.5,'right')
 			RenderText('bonus',string.format('%d/%d',self.sc_hist[1],self.sc_hist[2]),97+xoffset,207-dy2,0.5,'right')
-			RenderText('bonus','HISTORY      BONUS',137+xoffset,207-dy2,0.5,'right')
+			RenderText('bonus','HISTORY        BONUS',137+xoffset,207-dy2,0.5,'right')
 			SetFontState('bonus','',Color(alpha*255,255,255,255))
 			RenderText('bonus',b,186+xoffset,208-dy2,0.5,'right')
 			RenderText('bonus',string.format('%d/%d',self.sc_hist[1],self.sc_hist[2]),96+xoffset,208-dy2,0.5,'right')
-			RenderText('bonus','HISTORY      BONUS',136+xoffset,208-dy2,0.5,'right')
+			RenderText('bonus','HISTORY        BONUS',136+xoffset,208-dy2,0.5,'right')
 		end
 	end
 	--非符、符卡时间
