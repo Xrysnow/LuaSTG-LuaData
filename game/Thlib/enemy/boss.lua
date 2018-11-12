@@ -121,17 +121,6 @@ function boss:frame()
 	--执行自身task
 	task.Do(self)
 	--by OLC，行走图系统
-	if self.img4 then
-		self._wisys.mode = 4
-	elseif self.img3 then
-		self._wisys.mode = 3
-	elseif self.img2 then
-		self._wisys.mode = 2
-	elseif self.img1 then
-		self._wisys.mode = 1
-	else
-		self._wisys.mode = 0
-	end
 	self._wisys:frame()
 	--受击闪烁
 	if self.dmgt then self.dmgt = max(0, self.dmgt - 1) end
@@ -894,11 +883,11 @@ function boss_ui:render()
 			SetFontState('bonus','',Color(alpha*255,0,0,0))
 			RenderText('bonus',b,187+xoffset,207-dy2,0.5,'right')
 			RenderText('bonus',string.format('%d/%d',self.sc_hist[1],self.sc_hist[2]),97+xoffset,207-dy2,0.5,'right')
-			RenderText('bonus','HISTORY      BONUS',137+xoffset,207-dy2,0.5,'right')
+			RenderText('bonus','HISTORY        BONUS',137+xoffset,207-dy2,0.5,'right')
 			SetFontState('bonus','',Color(alpha*255,255,255,255))
 			RenderText('bonus',b,186+xoffset,208-dy2,0.5,'right')
 			RenderText('bonus',string.format('%d/%d',self.sc_hist[1],self.sc_hist[2]),96+xoffset,208-dy2,0.5,'right')
-			RenderText('bonus','HISTORY      BONUS',136+xoffset,208-dy2,0.5,'right')
+			RenderText('bonus','HISTORY        BONUS',136+xoffset,208-dy2,0.5,'right')
 		end
 	end
 	--非符、符卡时间
