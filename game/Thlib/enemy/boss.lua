@@ -84,6 +84,7 @@ function boss:del()
 end
 
 ----------------------------------------
+
 Include"Thlib\\enemy\\boss_resources.lua"
 Include"Thlib\\enemy\\boss_system.lua"
 Include"Thlib\\enemy\\boss_function.lua"
