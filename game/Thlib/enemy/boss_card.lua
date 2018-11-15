@@ -1,4 +1,13 @@
+--======================================
+--th style boss card
+--======================================
+
+----------------------------------------
+--boss card
+--~细节：大多数时候只会用到New、init、render和del，其中init、del在编辑器中重载
+
 boss.card = {}
+
 function boss.card.New(name, t1, t2, t3, hp, drop, is_extra)
     local c = {}
     c.frame = boss.card.frame
@@ -19,7 +28,9 @@ function boss.card.New(name, t1, t2, t3, hp, drop, is_extra)
     c.is_combat = true
     return c
 end
+
 function boss.card:frame() end
+
 function boss.card:render()
     local c = boss.GetCurrentCard(self)
     local alpha = self.aura_alpha or 255
@@ -57,5 +68,7 @@ function boss.card:render()
         end
     end
 end
+
 function boss.card:init() end
+
 function boss.card:del() end

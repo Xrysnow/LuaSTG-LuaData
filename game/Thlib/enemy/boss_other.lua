@@ -1,15 +1,13 @@
-function boss:GetCurrentCard()
-    local c = self.current_card
-    if not(c) and self.cards then
-        c = self.cards[self.card_num]
-    end
-    if boss.ex and boss.ex.status == 1 then
-        c = boss.ex.cards[boss.ex.nextcard]
-    end
-    return c
-end
+--======================================
+--th style boss
+--特效、其他组件
+--======================================
+
+----------------------------------------
+--boss move
 
 --随机移动（没有使用）
+
 function boss.MoveTowardsPlayer(t)
     local dirx,diry
     local self=task.GetSelf()
@@ -88,19 +86,11 @@ end
 function boss.escape:del() end
 
 ----------------------------------------
-
-function test_ex(ex)--测试代码，日后要移除
-    ex.lifes={300,100,400}
-    ex.lifesmax={300,100,700}
-    ex.modes={0,1,0}
-end
-
-----------------------------------------
 --boss 特效
 --一些华丽的效果（
 
 --开卡文字
---！警告：未适配宽屏
+--！警告：未适配宽屏等非传统版面
 
 spell_card_ef=Class(object)
 function spell_card_ef:init()
@@ -283,6 +273,7 @@ function hinter_bonus:render()
     end
 end
 
+----------------------------------------
 --杂项
 
 function Render_RIng_4(angle,r,angle_offset,x0,y0,r_,imagename)--未使用
@@ -303,4 +294,10 @@ function Render_RIng_4(angle,r,angle_offset,x0,y0,r_,imagename)--未使用
     x4=x0+(R_2)*cos(A_1)
     y4=y0+(R_2)*sin(A_1)
     Render4V(imagename,x1,y1,0.5,x2,y2,0.5,x3,y3,0.5,x4,y4,0.5)
+end
+
+function test_ex(ex)--测试代码，日后要移除
+    ex.lifes={300,100,400}
+    ex.lifesmax={300,100,700}
+    ex.modes={0,1,0}
 end

@@ -104,6 +104,17 @@ function boss:take_damage(dmg)
     end
 end
 
+function boss:GetCurrentCard()--已整合进boss system，可能不再使用
+    local c = self.current_card
+    if not(c) and self.cards then
+        c = self.cards[self.card_num]
+    end
+    if boss.ex and boss.ex.status == 1 then
+        c = boss.ex.cards[boss.ex.nextcard]
+    end
+    return c
+end
+
 ----------------------------------------
 --boss ex
 --！警告：一些boss ex逻辑代码从编辑器中生成，可能会造成逻辑梳理困难

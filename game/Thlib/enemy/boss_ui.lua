@@ -1,6 +1,14 @@
+--======================================
+--th style boss ui
+--======================================
+
+----------------------------------------
+--boss ui
+--！警告：未适配宽屏等非传统版面
+
 boss_ui=Class(object)
 
-boss_ui.active_count=0
+boss_ui.active_count=0--多boss时，boss ui 槽位计数
 
 function boss_ui:init(b)
     self.layer=LAYER_TOP
@@ -219,7 +227,7 @@ function boss_ui:render_hpbar_ex()
         life=life+z
     end
     life=min(maxlife*rate,life)
-
+    
     local start=90
     local startlife=0
     local stop=90
@@ -245,7 +253,6 @@ function boss_ui:render_hpbar_ex()
             --misc.Renderhpbar(self.boss.x,self.boss.y,90,360,60,64,360,1)
             --misc.Renderhp(self.boss.x,self.boss.y,90,360,60,64,360,1)
             Render('life_node',self.boss.x+61*cos(stop),self.boss.y+61*sin(stop),stop-90,0.55)
-
         end
         startlife=startlife+z
         start=stop
@@ -262,9 +269,6 @@ function boss_ui:render_hpbar_ex()
         startlife=startlife+z
         start=stop
     end
-
-
-    
 end
 
 function boss_ui:kill()--kill and del function

@@ -54,16 +54,16 @@ function boss:render()
     for i=1,25 do
         SetImageState('boss_aura_3D'..i, 'mul+add', Color(self.aura_alpha, 255, 255, 255))
     end
-    Render('boss_aura_3D'..self.ani % 25 + 1, self.x, self.y, self.ani * 0.75, 0.92 * self.aura_scale, (0.8 + 0.12 * cos(self.ani * 0.75)) * self.aura_scale)  
+    Render('boss_aura_3D'..self.ani % 25 + 1, self.x, self.y, self.ani * 0.75, 0.92 * self.aura_scale, (0.8 + 0.12 * cos(self.ani * 0.75)) * self.aura_scale)
     self._bosssys:render()
-    self._wisys:render(self.dmgt, self.dmgmaxt)--by OLC，行走图系统
+    self._wisys:render(self.dmgt, self.dmgmaxt) --by OLC，行走图系统
 end
 
 function boss:kill()
     _kill_servants(self)
     self._bosssys:kill()
     --boss行为更新
-    if (not self.ex) then--执行boss ex逻辑时不执行boss逻辑
+    if (not self.ex) then --执行boss ex逻辑时不执行boss逻辑
         do return end
     elseif self._bosssys:next() then --切换到下一个行为
         PreserveObject(self)
@@ -81,7 +81,9 @@ end
 ----------------------------------------
 --boss函数库和资源
 
-LoadTexture('boss','THlib\\enemy\\boss.png')
+local patch="Thlib\\enemy\\"
+
+LoadTexture('boss',patch..'boss.png')
 LoadImageGroup('bossring1','boss',80,0,16,8,1,16)
 for i=1,16 do SetImageState('bossring1'..i,'mul+add',Color(0x80FFFFFF)) end
 LoadImageGroup('bossring2','boss',48,0,16,8,1,16)
@@ -91,23 +93,23 @@ LoadImage('hpbar','boss',116,0,8,128)
 --LoadImage('hpbar1','boss',116,0,2,2)
 LoadImage('hpbar2','boss',116,0,2,2)
 SetImageCenter('hpbar',0,0)
-LoadTexture('undefined','THlib\\enemy\\undefined.png')
+LoadTexture('undefined',patch..'undefined.png')
 LoadImage('undefined','undefined',0,0,128,128,16,16)
 SetImageState('undefined','mul+add',Color(0x80FFFFFF))
-LoadImageFromFile('base_hp','THlib\\enemy\\ring00.png')
+LoadImageFromFile('base_hp',patch..'ring00.png')
 SetImageState('base_hp','',Color(0xFFFF0000))
-LoadTexture('lifebar','Thlib\\enemy\\lifebar.png')
+LoadTexture('lifebar',patch..'lifebar.png')
 LoadImage('life_node','lifebar',20,0,12,16)
 LoadImage('hpbar1','lifebar',4,0,2,2)
 SetImageState('hpbar1','',Color(0xFFFFFFFF))
 SetImageState('hpbar2','',Color(0x77D5CFFF))
-LoadTexture('magicsquare','THlib\\enemy\\eff_magicsquare.png')
+LoadTexture('magicsquare',patch..'eff_magicsquare.png')
 LoadImageGroup('boss_aura_3D','magicsquare',0,0,256,256,5,5)
-LoadImageFromFile('dialog_box','THlib\\enemy\\dialog_box.png')
+LoadImageFromFile('dialog_box',patch..'dialog_box.png')
 
-Include"Thlib\\enemy\\boss_system.lua"--boss行为逻辑
-Include"Thlib\\enemy\\boss_function.lua"--boss额外函数
-Include"Thlib\\enemy\\boss_card.lua"--boss非符、符卡
-Include"Thlib\\enemy\\boss_dialog.lua"--boss对话
-Include"Thlib\\enemy\\boss_other.lua"--杂项、boss移动、特效
-Include"Thlib\\enemy\\boss_ui.lua"--boss ui
+Include(patch.."boss_system.lua")--boss行为逻辑
+Include(patch.."boss_function.lua")--boss额外函数
+Include(patch.."boss_card.lua")--boss非符、符卡
+Include(patch.."boss_dialog.lua")--boss对话
+Include(patch.."boss_other.lua")--杂项、boss移动、特效
+Include(patch.."boss_ui.lua")--boss ui

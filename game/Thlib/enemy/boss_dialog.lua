@@ -1,3 +1,12 @@
+--======================================
+--th style boss dialog
+--======================================
+
+----------------------------------------
+--boss dialog
+--！警告：未适配多玩家，一部分逻辑代码从编辑器中生成，需要相应去修改编辑器
+--#待改进：_dialog_can_skip不应该使用全局变量，其逻辑代码从编辑器中生成，需要相应去修改编辑器
+
 boss.dialog={}
 
 function boss.dialog.New(can_skip)
@@ -30,6 +39,11 @@ function boss.dialog:del()
     Del(self.dialog_displayer)
     self.dialog_displayer=nil
 end
+
+----------------------------------------
+--boss dialog sentence
+--！警告：输入未适配jstg，会造成rep出错
+--！警告：未适配宽屏等非传统版面
 
 function boss.dialog:sentence(img,pos,text,t,hscale,vscale)
     if pos=='left' then pos=1 else pos=-1 end
