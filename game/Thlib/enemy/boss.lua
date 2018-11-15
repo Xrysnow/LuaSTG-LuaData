@@ -2,6 +2,9 @@
 --th style boss
 --======================================
 
+----------------------------------------
+--boss base
+
 boss = Class(enemybase)
 
 function boss:init(x, y, name, cards, bg, diff)
@@ -13,9 +16,10 @@ function boss:init(x, y, name, cards, bg, diff)
     self.aura_alpha = 255 --法阵透明度
     self.aura_alpha_d = 4 --法阵透明度单帧变化值
     self.aura_scale = 1 --法阵大小比例
-    self._bosssys = BossSystem(self, name, cards, bg, diff) --boss系统
-    --boss行走图
-    self._wisys = BossWalkImageSystem(self) --行走图系统
+    --boss系统
+    self._bosssys = BossSystem(self, name, cards, bg, diff)
+    --boss行走图系统
+    self._wisys = BossWalkImageSystem(self)
     --boss ex
     if self.ex == nil then
         Kill(self) --开始执行通常符卡系统
@@ -24,7 +28,6 @@ function boss:init(x, y, name, cards, bg, diff)
     lstg.tmpvar.boss = self
 end
 
---！警告：潜在的多玩家适配问题
 function boss:frame()
     --出屏判定关闭
     SetAttr(self, 'colli', BoxCheck(self, lstg.world.boundl, lstg.world.boundr, lstg.world.boundb, lstg.world.boundt) and self._colli)
@@ -56,16 +59,6 @@ function boss:render()
     self._wisys:render(self.dmgt, self.dmgmaxt)--by OLC，行走图系统
 end
 
-function boss:take_damage(dmg)
-    if self.dmgmaxt then self.dmgt = self.dmgmaxt end
-    if not self.protect then
-        local dmg0 = dmg * self.dmg_factor
-        self.spell_damage = self.spell_damage+dmg0
-        self.hp = self.hp - dmg0
-        lstg.var.score = lstg.var.score + 10
-    end
-end
-
 function boss:kill()
     _kill_servants(self)
     self._bosssys:kill()
@@ -84,11 +77,35 @@ function boss:del()
 end
 
 ----------------------------------------
+--boss函数库和资源
 
-Include"Thlib\\enemy\\boss_resources.lua"
-Include"Thlib\\enemy\\boss_system.lua"
-Include"Thlib\\enemy\\boss_function.lua"
-Include"Thlib\\enemy\\boss_card.lua"
-Include"Thlib\\enemy\\boss_dialog.lua"
-Include"Thlib\\enemy\\boss_other.lua"
-Include"Thlib\\enemy\\boss_ui.lua"
+LoadTexture('boss','THlib\\enemy\\boss.png')
+LoadImageGroup('bossring1','boss',80,0,16,8,1,16)
+for i=1,16 do SetImageState('bossring1'..i,'mul+add',Color(0x80FFFFFF)) end
+LoadImageGroup('bossring2','boss',48,0,16,8,1,16)
+for i=1,16 do SetImageState('bossring2'..i,'mul+add',Color(0x80FFFFFF)) end
+LoadImage('spell_card_ef','boss',96,0,16,128)
+LoadImage('hpbar','boss',116,0,8,128)
+--LoadImage('hpbar1','boss',116,0,2,2)
+LoadImage('hpbar2','boss',116,0,2,2)
+SetImageCenter('hpbar',0,0)
+LoadTexture('undefined','THlib\\enemy\\undefined.png')
+LoadImage('undefined','undefined',0,0,128,128,16,16)
+SetImageState('undefined','mul+add',Color(0x80FFFFFF))
+LoadImageFromFile('base_hp','THlib\\enemy\\ring00.png')
+SetImageState('base_hp','',Color(0xFFFF0000))
+LoadTexture('lifebar','Thlib\\enemy\\lifebar.png')
+LoadImage('life_node','lifebar',20,0,12,16)
+LoadImage('hpbar1','lifebar',4,0,2,2)
+SetImageState('hpbar1','',Color(0xFFFFFFFF))
+SetImageState('hpbar2','',Color(0x77D5CFFF))
+LoadTexture('magicsquare','THlib\\enemy\\eff_magicsquare.png')
+LoadImageGroup('boss_aura_3D','magicsquare',0,0,256,256,5,5)
+LoadImageFromFile('dialog_box','THlib\\enemy\\dialog_box.png')
+
+Include"Thlib\\enemy\\boss_system.lua"--boss行为逻辑
+Include"Thlib\\enemy\\boss_function.lua"--boss额外函数
+Include"Thlib\\enemy\\boss_card.lua"--boss非符、符卡
+Include"Thlib\\enemy\\boss_dialog.lua"--boss对话
+Include"Thlib\\enemy\\boss_other.lua"--杂项、boss移动、特效
+Include"Thlib\\enemy\\boss_ui.lua"--boss ui

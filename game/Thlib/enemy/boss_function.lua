@@ -1,4 +1,12 @@
-function boss:PopSpellResult(c) --弹出提示文字等
+--======================================
+--th style boss system misc
+--额外的函数
+--======================================
+
+----------------------------------------
+--boss 额外函数
+
+function boss:PopSpellResult(c) --boss行为结束逻辑，弹出提示文字、写入存档等
     if c.is_combat then
         self.spell_get = false
         if (self.hp <= 0 and self.timeout == 0) or (c.t1 == c.t3 and self.timeout == 1) then
@@ -29,7 +37,7 @@ function boss:PopSpellResult(c) --弹出提示文字等
         else
             PlaySound('enep02',0.4,0)
             local players=Players()
-            Print("Clear ",#players)
+            --Print("Clear ",#players)
             for _,p in pairs(players) do
                 New(bullet_killer,p.x,p.y,true)
             end
@@ -86,7 +94,19 @@ function boss:cast(cast_t)
     self.cast = 1
 end
 
+function boss:take_damage(dmg)
+    if self.dmgmaxt then self.dmgt = self.dmgmaxt end
+    if not self.protect then
+        local dmg0 = dmg * self.dmg_factor
+        self.spell_damage = self.spell_damage+dmg0
+        self.hp = self.hp - dmg0
+        lstg.var.score = lstg.var.score + 10
+    end
+end
+
+----------------------------------------
 --boss ex
+--！警告：一些boss ex逻辑代码从编辑器中生成，可能会造成逻辑梳理困难
 
 function boss:killex()
     if self.ex.status == 1 then
