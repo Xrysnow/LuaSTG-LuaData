@@ -63,7 +63,7 @@ function boss:kill()
     _kill_servants(self)
     self._bosssys:kill()
     --boss行为更新
-    if (not self.ex) then --执行boss ex逻辑时不执行boss逻辑
+    if self.ex then --执行boss ex逻辑时不执行boss逻辑
         do return end
     elseif self._bosssys:next() then --切换到下一个行为
         PreserveObject(self)
