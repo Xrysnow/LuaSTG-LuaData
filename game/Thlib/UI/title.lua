@@ -31,6 +31,7 @@ function stage_menu:init()
             if IsValid(m) then m.pos=1 end
         end
     end
+    stage_menu.reset_pos = reset_pos
     local p1ok=1
     local p2ok=1
     jstg.enable_player=true
@@ -96,7 +97,6 @@ function stage_menu:init()
     table.insert(menu_items,{'exit',function()
         jstg.SinglePlayer()
         menu.FlyIn(menu_title,'left')
-        reset_pos()--重置菜单pos
         menu.FlyOut(menu_network,'right')
     end})
     menu_network=New(simple_menu,'Network',menu_items)

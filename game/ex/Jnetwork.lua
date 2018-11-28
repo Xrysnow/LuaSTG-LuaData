@@ -146,6 +146,7 @@ function jstg.ProceedConnect()
 		--修改联机菜单标题，返回主菜单
 		jstg.nettitle[1]='Disconnect'
 		stage_menu.update(jstg.menu_title)
+		stage_menu.reset_pos()
 		menu.FlyIn(jstg.menu_title,'left')
 		menu.FlyOut(jstg.menu_network,'right')	
 		ran:Seed(jstg.network.ran_seed)
