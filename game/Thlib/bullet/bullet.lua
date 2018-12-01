@@ -604,7 +604,7 @@ function straight_495:frame()
 			self.reflected = true
 			return
 		end
-		if x < -world.l then
+		if x < world.l then
 			self.vx = -self.vx
 			if self.acceleration and self.acceleration.ax then
 				self.acceleration.ax = -self.acceleration.ax
