@@ -569,7 +569,7 @@ smear.func = function(img)--修改by OLC，修复了疯狂重复加载的问题
 	if not lstg.tmpvar.smearcache[img] then
 		smear.cache[img] = img.."_smear_psi"
 		lstg.tmpvar.smearcache[img] = img.."_smear_psi"
-		LoadPS(img.."_smear_psi","THlib\\bullet\\smear.psi",img)
+		LoadPS(img.."_smear_psi","THlib\\smear.psi",img)
 	end
 	return lstg.tmpvar.smearcache[img]
 end
