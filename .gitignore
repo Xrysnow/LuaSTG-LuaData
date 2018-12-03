@@ -52,3 +52,6 @@
 
 #不需要tools文件夹的内容
 /tools/*
+
+#雀哥nb！
+/editorSharp/*
