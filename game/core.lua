@@ -1,133 +1,32 @@
---======================================
---core
---所有基础的东西都会在这里定义
---======================================
+---=====================================
+---core
+---所有基础的东西都会在这里定义
+---=====================================
+
+---@class lstg @内建函数库
+lstg=lstg or {}
 
 ----------------------------------------
 --各个模块
 
-require "rebounding"--迟早要干掉这个
-
-DoFile("lib\\Lmath.lua")--数学常量、数学函数、随机数系统
-DoFile("plus\\plus.lua")--CHU神的plus库，replay系统、行走图系统、plusClass、NativeAPI
-DoFile("ex\\ex.lua")--ESC神的ex库，多玩家支持、网络连接、多world、多输入槽位
-DoFile("lib\\Lobject.lua")--Luastg的Class、object
-DoFile("lib\\Lresources.lua")--资源的加载函数、资源枚举和判断
-DoFile("lib\\Lscreen.lua")--world、3d、viewmode的参数设置
-DoFile("lib\\Linput.lua")--按键状态更新
-DoFile("lib\\Ltask.lua")--task
-DoFile("lib\\Lstage.lua")--stage关卡系统
-DoFile("lib\\Ltext.lua")--文字渲染
-DoFile("lib\\Lscoredata.lua")--玩家存档
-DoFile("sp\\sp.lua")--OLC神的sp加强库
-
-----------------------------------------
---用户全局变量
-
-lstg.var={username=setting.username}
-lstg.tmpvar={}
-
-function SetGlobal(k,v)
-	lstg.var[k]=v
-end
-
-function GetGlobal(k,v)
-	return lstg.var[k]
-end
-
-function ResetLstgtmpvar()
-	lstg.tmpvar={}
-end
+lstg.DoFile("lib\\Llog.lua")--简单的log系统
+lstg.DoFile("lib\\Ldebug.lua")--简单的debug库
+lstg.DoFile("lib\\Lglobal.lua")--用户全局变量
+lstg.DoFile("lib\\Lmath.lua")--数学常量、数学函数、随机数系统
+lstg.DoFile("plus\\plus.lua")--CHU神的plus库，replay系统、行走图系统、plusClass、NativeAPI
+lstg.DoFile("ex\\ex.lua")--ESC神的ex库，多玩家支持、网络连接、多world、多输入槽位
+lstg.DoFile("lib\\Lobject.lua")--Luastg的Class、object
+lstg.DoFile("lib\\Lresources.lua")--资源的加载函数、资源枚举和判断
+lstg.DoFile("lib\\Lscreen.lua")--world、3d、viewmode的参数设置
+lstg.DoFile("lib\\Linput.lua")--按键状态更新
+lstg.DoFile("lib\\Ltask.lua")--task
+lstg.DoFile("lib\\Lstage.lua")--stage关卡系统
+lstg.DoFile("lib\\Ltext.lua")--文字渲染
+lstg.DoFile("lib\\Lscoredata.lua")--玩家存档
+lstg.DoFile("sp\\sp.lua")--OLC神的sp加强库
 
 ----------------------------------------
 --用户定义的一些函数
-
-function UserSystemOperation()--模拟内核级操作
-	--合并了三次遍历为一次，优化性能by ETC and OLC
-	local polar,radius,angle,delta,omiga,center,
-		alist,accelx,accely,gravity,
-		forbid,vx,vy,v,ovx,ovy,cache
-	for id = 0,15 do
-		for _,obj in ObjList(id) do
-			--assistance of Polar coordinate system
-			polar=obj.polar
-			if polar then
-				radius = polar.radius or 0
-				angle = polar.angle or 0
-				delta = polar.delta
-				if delta then polar.radius = radius + delta end
-				omiga = polar.omiga
-				if omiga then polar.angle = angle + omiga end
-				center = polar.center or {x=0,y=0}
-				radius = polar.radius
-				angle = polar.angle
-				obj.x = center.x + radius * cos(angle)
-				obj.y = center.y + radius * sin(angle)
-			end
-			--acceleration and gravity
-			alist = obj.acceleration
-			if alist then
-				accelx = alist.ax
-				if accelx then obj.vx = obj.vx + accelx end
-				accely = alist.ay
-				if accely then obj.vy = obj.vy + accely end
-				gravity = alist.g
-				if gravity then obj.vy = obj.vy - gravity end
-			end
-			--limitation of velocity
-			forbid = obj.forbidveloc
-			if forbid then
-				ovx = obj.vx
-				ovy = obj.vy
-				v = forbid.v
-				if v and (v*v) < (ovx*ovx+ovy*ovy) then
-					cache = v/hypot(ovx,ovy)
-					obj.vx = cache*ovx
-					obj.vy = cache*ovy
-					ovx = obj.vx
-					ovy = obj.vy
-				end
-				vx = forbid.vx
-				vy = forbid.vy
-				if vx and vx < abs(ovx) then obj.vx = vx end
-				if vy and vy < abs(ovy) then obj.vy = vy end
-			end
-		end
-	end
-	--最傻吊的rebounder
-	if not ReboundPause and rebounder.size ~= 0 then
-		for _,obj in ObjList(GROUP_ENEMY_BULLET) do
-			if IsValid(obj) and obj.colli and (obj.vx ~= 0 or obj.vy ~= 0) then
-				local accel, ax, ay = obj.acceleration, 0, 0
-				if accel then ax, ay = accel.ax, accel.ay end
-				result = { rebounding.ReboundCheck(obj.x, obj.y, obj.vx, obj.vy, ax, ay) }
-				if result[1] then
-					obj.x,obj.y,obj.vx,obj.vy = unpack(result,1,4)
-					if accel then accel.ax, accel.ay = result[5],result[6] end
-					for i=7,#result do
-						local self = rebounder.list[result[i]]
-						self.class.colli(self, obj)
-					end
-				end
-			end
-		end
-		for _,obj in ObjList(GROUP_INDES) do
-			if IsValid(obj) and obj.colli and (obj.vx ~= 0 or obj.vy ~= 0) then
-				local accel, ax, ay = obj.acceleration, 0, 0
-				if accel then ax, ay = accel.ax, accel.ay end
-				result = { rebounding.ReboundCheck(obj.x, obj.y, obj.vx, obj.vy, ax, ay) }
-				if result[1] then
-					obj.x,obj.y,obj.vx,obj.vy = unpack(result,1,4)
-					if accel then accel.ax, accel.ay = result[5],result[6] end
-					for i=7,#result do
-						local self = rebounder.list[result[i]]
-						self.class.colli(self, obj)
-					end
-				end
-			end
-		end
-	end
-end
 
 function DoFrame()--行为帧动作(和游戏循环的帧动作分开)
 	--标题设置
@@ -144,7 +43,7 @@ function DoFrame()--行为帧动作(和游戏循环的帧动作分开)
 		local w1=GetDefaultWorld()--by ETC，默认world参数由Lscreen提供
 		jstg.ApplyWorld(w1)
 		
-		ResetLstgtmpvar()--重置lstg.tmpvar
+		lstg.ResetLstgtmpvar()--重置lstg.tmpvar
 		ex.Reset()--重置ex全局变量
 		
 		if lstg.nextvar then
@@ -198,7 +97,6 @@ function DoFrame()--行为帧动作(和游戏循环的帧动作分开)
 	end
 	ObjFrame()
 	if GetCurrentSuperPause()<=0 or stage.nopause then
-		UserSystemOperation()
 		for i=1,#jstg.worlds do
 			jstg.SwitchWorld(i)
 			SetWorldFlag(jstg.worlds[i].world)
@@ -234,21 +132,14 @@ function DoFrame()--行为帧动作(和游戏循环的帧动作分开)
 	end
 end
 
-function BeforeRender()
-end
+function BeforeRender() end
 
-function AfterRender()
-end
+function AfterRender() end
 
-function GameExit()
-
-end
+function GameExit() end
 
 ----------------------------------------
 --全局回调函数，底层调用
-
-lstg.quit_flag=false
-lstg.paused=false
 
 function GameInit()
 	SetViewMode'world'
@@ -275,13 +166,9 @@ function RenderFunc()
 	end
 end
 
-function FocusLoseFunc()
+function FocusLoseFunc() end
 
-end
-
-function FocusGainFunc()
-
-end
+function FocusGainFunc() end
 
 ----------------------------------------
 --加载mod包
