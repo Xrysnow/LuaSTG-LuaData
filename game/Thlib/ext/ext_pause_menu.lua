@@ -74,28 +74,28 @@ function ext.pausemenu.frame(self)
 	else
 		pause_menu_text=ext.pausemenu.text[m]
 	end
-	--检测按键切换槽位
+	---[[检测按键切换槽位
 	if GetLastKey()==setting.keys.up and self.t<=0 then
+		--Print("!!!!!!pos up!!!!!!"..self.timer)
 		if not self.choose then
 			self.pos=self.pos-1
 		else
 			self.pos2=self.pos2-1
 		end
-		self.t=4
 		PlaySound('select00',0.3)
 	end
 	if GetLastKey()==setting.keys.down and self.t<=0 then
+		--Print("!!!!!!pos down!!!!!!"..self.timer)
 		if not self.choose then
 			self.pos=self.pos+1
 		else
 			self.pos2=self.pos2+1
 		end
-		self.t=4
 		PlaySound('select00',0.3)
 	end
 	self.pos=(self.pos-1)%(#pause_menu_text)+1
 	self.pos2=(self.pos2-1)%(2)+1
-	--
+	--]]
 	self.timer=self.timer+1
 	if self.t>0 then self.t=self.t-1 end
 	if self.choose then
@@ -114,7 +114,9 @@ function ext.pausemenu.frame(self)
 	--执行自身task
 	task.Do(self)
 	--执行选项操作
+	---[[
 	if (GetLastKey()==setting.keysys.menu or GetLastKey()==setting.keys.shoot or GetLastKey()==setting.keys.spell or GetLastKey()==setting.keysys.retry) and not self.lock then
+		--Print("!!!!!!select!!!!!!"..self.timer)
 		if GetLastKey()==setting.keysys.retry then
 			PlaySound('ok00',0.3)
 			lstg.tmpvar.death = false
@@ -203,6 +205,7 @@ function ext.pausemenu.frame(self)
 			end)
 		end
 	end
+	--]]
 end
 
 function ext.pausemenu.render(self)
