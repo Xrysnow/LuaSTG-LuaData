@@ -179,12 +179,14 @@ function jstg.GetInputEx(is_pause)--OLC提供的一个解决方法，解决了�
 			KeyState[k]=t
 		end
 	end
-	for k, v in pairs(setting.keys) do
-		KeyState[k] = false
-	end
-	for i=1,jstg.inputcount do
-		for k, v in pairs(jstg.keys[i]) do
-			KeyState[k] = v or KeyState[k]
+	if not is_pause then
+		for k, v in pairs(setting.keys) do
+			KeyState[k] = false
+		end
+		for i=1,jstg.inputcount do
+			for k, v in pairs(jstg.keys[i]) do
+				KeyState[k] = v or KeyState[k]
+			end
 		end
 	end
 	--compatible old stage replay
