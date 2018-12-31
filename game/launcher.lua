@@ -471,7 +471,7 @@ function simple_menu_mod:frame()
 end
 
 function simple_menu_mod:render()
-	DrawMODTTF(self.title,self._list,self._pos,self.x,self.y,self.alpha,self.timer,self.pos_changed)
+	DrawMOD(self.title,self._list,self._pos,self.x,self.y,self.alpha,self.timer,self.pos_changed)
 end
 
 function DrawMOD(title,text,pos,x,y,alpha,timer,shake,align)
@@ -540,11 +540,11 @@ function start_game()
 		stage.QuitGame()
 		return
 	end
-	SetSEVolume(setting.sevolume)
-	SetBGMVolume(setting.bgmvolume)
+	SetSEVolume(setting.sevolume/100)
+	SetBGMVolume(setting.bgmvolume/100)
 	ResetScreen()--Lscreen
-	ResetUI()
 	SetResourceStatus'global'
+	ResetUI()
 	Include("root.lua")
 	SetResourceStatus'stage'
 	InitAllClass()--Lobject

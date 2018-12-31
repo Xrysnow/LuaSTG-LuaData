@@ -216,7 +216,10 @@ end
 function ReplayManager.SaveReplayInfo(path, data)
     local f = plus.FileStream(path, "wb")
     local w = plus.BinaryWriter(f)
-
+    --用于记录当前replay文件是否已经完整保存
+    --如果保存中途出错，那么该文件会在finally函数中删除，防止下次进入游戏时读取到损坏的录像文件导致再次炸游戏
+    local _save_finish=false
+    
     plus.TryCatch {
         try =
             function()
@@ -275,10 +278,15 @@ function ReplayManager.SaveReplayInfo(path, data)
                     w:WriteUInt(stage.frameData:GetCount())  -- 帧数
                     stage.frameData:Write(f)  -- 数据
                 end
+    
+                _save_finish=true
             end,
         finally =
             function()
                 f:Close()
+                if not(_save_finish) then
+                    f:Delete()--by ETC
+                end
             end
     }
 end

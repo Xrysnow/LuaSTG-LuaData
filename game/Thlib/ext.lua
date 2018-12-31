@@ -36,8 +36,7 @@ end
 ----------------------------------------
 --extra game loop
 
-function GameStateChange()--？？？
-end
+function GameStateChange() end
 
 function GetInput()--不再使用，已转为jstg.GetInputEX
 	if stage.next_stage then
@@ -204,9 +203,6 @@ function AfterRender()
 	if ext.pause_menu then
 		--暂停菜单渲染
 		ext.pause_menu.render(ext.pause_menu)
-	end
-	if _render_debug then
-		lstg.RenderDebug.RenderDrawcallTimer()--用于制作者检查是否有渲染函数调用过多的问题
 	end
 end
 

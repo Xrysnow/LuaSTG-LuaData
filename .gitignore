@@ -49,6 +49,7 @@
 /game/snapshot/*
 #不需要autorun文件夹的内容
 /game/autorun/*
+/game/Library/*
 
 #不需要tools文件夹的内容
 /tools/*

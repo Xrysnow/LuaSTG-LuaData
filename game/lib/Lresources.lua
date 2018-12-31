@@ -1,9 +1,9 @@
---======================================
---luastg resources
---======================================
+---=====================================
+---luastg resources
+---=====================================
 
 ----------------------------------------
---脚本载入
+---脚本载入
 
 lstg.included={}
 lstg.current_script_path={''}
@@ -23,7 +23,7 @@ function Include(filename)
 end
 
 ----------------------------------------
---资源载入
+---资源载入
 
 ImageList = {}
 ImageSize = {}--由OLC添加，用于储存加载的图片的大小
@@ -36,10 +36,8 @@ function LoadImage(img,...)
 	OriginalLoadImage(img,...)
 end
 
---由OLC添加，获得加载的图片的大小
-function GetImageSize(img)
-	return unpack(ImageSize[img])
-end
+---由OLC添加，获得加载的图片的大小
+function GetImageSize(img) return unpack(ImageSize[img]) end
 
 function CopyImage(newname,img)
 	if ImageList[img] then
@@ -75,12 +73,10 @@ function LoadImageGroupFromFile(texaniname,filename,mipmap,n,m,a,b,rect)
 	LoadImageGroup(texaniname,texaniname,0,0,w/n,h/m,n,m,a,b,rect)
 end
 
-function LoadTTF(ttfname,filename,size)
-	lstg.LoadTTF(ttfname,filename,0,size)
-end
+function LoadTTF(ttfname,filename,size) lstg.LoadTTF(ttfname,filename,0,size) end
 
 ----------------------------------------
---资源判断和枚举
+---资源判断和枚举
 
 ENUM_RES_TYPE={tex=1,img=2,ani=3,bgm=4,snd=5,psi=6,fnt=7,ttf=8,fx=9}
 
@@ -92,10 +88,11 @@ end
 
 function EnumRes(typename)
 	local t=ENUM_RES_TYPE[typename]
-	if t==nil then error('Invalid resource type name.')
-	else return lstg.EnumRes(t) end
+	if t==nil then
+		error('Invalid resource type name.')
+	else
+		return lstg.EnumRes(t)
+	end
 end
 
-function FileExist(filename)
-	return not (lfs.attributes(filename)==nil)
-end
+function FileExist(filename) return not (lfs.attributes(filename)==nil) end

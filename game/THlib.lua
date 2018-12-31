@@ -1,9 +1,9 @@
---======================================
---Thlib
---======================================
+---=====================================
+---Thlib
+---=====================================
 
 ----------------------------------------
---加载脚本
+---加载脚本
 
 Include'THlib\\misc\\misc.lua'
 Include'THlib\\se\\se.lua'
@@ -24,7 +24,7 @@ Include'ex\\crazystorm.lua'
 Include'ex\\system.lua'
 Include'ex\\systems\\act7\\system_act7.lua'
 
---在autorun文件夹下面的lua脚本会自动执行，加载时机为data和mod之间，可能会被mod里面的定义覆盖
+---在autorun文件夹下面的lua脚本会自动执行，加载时机为data和mod之间，可能会被mod里面的定义覆盖
 local function autorun()
 	local r=FindFiles('autorun\\','lua')
 	for i,v in pairs(r) do

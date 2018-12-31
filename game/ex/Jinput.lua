@@ -1,25 +1,82 @@
---======================================
---javastg input controll
---======================================
+---=====================================
+---javastg input controll
+---=====================================
+
+local LOG_MODULE_NAME="[jstg][player|input]"
 
 ----------------------------------------
---JavaStage多人输入系统
+---Input
 
---格式化输入的列表
-jstg.syskey={ repslow =8, menu =9, repfast =10, snapshot =11, retry =12, right =4, left =5, slow =3, down =6, up =7, special =2, shoot =0, spell =1}
---对应的反查字符串
-jstg.syskey2={"shoot","spell","special","slow","right","left","down","up","repslow","menu","repfast","snapshot","retry"}
+jstg.KeyState={}
+jstg.KeyStatePre={}
+jstg.LastKey=0--最后输入的按键对应的VKEYcode
+jstg.OldKeyState={}
 
+---旧函数，获取最后按下的按键
+_GetLastKey=GetLastKey
+
+---获取最后按下的按键
+---@param id number @输入槽位
+---@return number @VKEYcode
+function GetLastKey(id)
+	if id then
+		local k1=jstg.keys[id]
+		local kp=jstg.keypres[id]
+		for k, v in pairs(jstg.syskey) do
+			if k1[k]~= kp[k] and k1[k] then
+				return jstg.SysVKey2Key(v)
+			end
+		end
+	else
+		return jstg.LastKey
+	end
+end
+
+---判断某个按键是否处于按下状态
+---@param key string @按键名
+---@param id number @输入槽位
+---@return boolean
+function KeyIsDown(key,id)
+	if id then
+		return jstg.keys[id][key]
+	else
+		return KeyState[key]
+	end
+end
+
+---判断某个按键是否处于当前帧按下
+---@param key string @按键名
+---@param id number @输入槽位
+---@return boolean
+function KeyIsPressed(key,id)
+	if id then
+		return jstg.keys[id][key] and (not jstg.keypres[id][key])
+	else
+		return KeyState[key] and (not KeyStatePre[key])
+	end
+end
+
+---判断某个按键是否处于按下状态
+KeyPress = KeyIsDown
+
+---判断某个按键是否处于按下状态
+KeyTrigger = KeyIsPressed
+
+----------------------------------------
+---Player Input
 
 --extern jstg.player_template={}
 --extern jstg.players={}
-jstg.keys={}
-jstg.keypres={}
+jstg.keys={}--各个输入槽位对应的当前帧按键状态
+jstg.keypres={}--各个输入槽位对应的前一帧按键状态
 jstg.keymaps={}
-jstg.inputcount=1
+jstg.inputcount=1--当前输入槽位数量
 
 jstg.splitplayer=false
+jstg.enable_player=false--若进入关卡初始化后该值为false，则代表该mod为旧mod
 
+---设置自机输入槽位
+---@param count number @自机输入槽位数量
 function jstg.CreateInput(count,delay)
 	jstg.inputcount=count
 	for i=count,1,-1 do
@@ -27,9 +84,8 @@ function jstg.CreateInput(count,delay)
 		jstg.keypres[i]={}
 	end
 end
-jstg.CreateInput(2)
 
-jstg.enable_player=false
+---创建自机，ex+版
 function jstg.CreatePlayers()
 	jstg.enable_player=true
 	
@@ -58,6 +114,8 @@ function jstg.CreatePlayers()
 		jstg.players[2]=last
 	end
 end
+
+---创建自机，兼容旧mod
 function jstg.Compatible()--for old mod
 	jstg.players={player}
 	local last=player
@@ -84,146 +142,11 @@ function jstg.Compatible()--for old mod
 	end
 end
 
+----------------------------------------
+---Game Input
 
-
-_GetLastKey=GetLastKey
-
-function GetLastKey(id)
-	if id then
-		local k1=jstg.keys[id]
-		local kp=jstg.keypres[id]
-		for k, v in pairs(jstg.syskey) do
-			if k1[k]~= kp[k] and k1[k] then
-				return jstg.SysVKey2Key(v)
-			end
-		end
-	else
-		return jstg.LastKey
-	end
-end
-
-function KeyIsDown(key,id)
-	if id then
-		return jstg.keys[id][key]
-	else
-		return KeyState[key]
-	end
-end
-KeyPress = KeyIsDown
-
-function KeyIsPressed(key,id)
-	if id then
-		return jstg.keys[id][key] and (not jstg.keypres[id][key])
-	else
-		return KeyState[key] and (not KeyStatePre[key])
-	end
-end
-KeyTrigger = KeyIsPressed
-
-function jstg.GetLocalPlayerIndexs()
-	local p={}
-	for i=1,#jstg.players do
-		if jstg.network.playerkeymask[i] == 0 or jstg.network.slots[jstg.network.playerkeymask[i]]=='local' then
-			p[#p+1]=i
-		end
-	end
-	return p
-end
-
---重置输入设备
-function jstg.ChangeInput()
-	--清空当前的输入设备
-	for i=1,#jstg.devices do
-		BindInput(0,i,0,0)--取消输入设备挂载
-		ReleaseInputDevice(jstg.devices[i])--删除输入设备
-	end
-	jstg.devices={}
-	ResetInput()--重置总线的时间戳
-	local playerid=1
-	local slotmask=2
-	for i=1,#jstg.network.slots do
-		if jstg.network.slots[i]=='local' then
-			local p=CreateInputDevice(false)--创建本地输入
-			--设置按键
-			local playerkeyinfo=setting.keys
-			local syskeyinfo=setting.keysys
-			if playerid>1 then playerkeyinfo=setting['keys'..playerid] end
-			for k,v in pairs(jstg.syskey) do
-				local key=playerkeyinfo[k]
-				if key==nil then
-					key=syskeyinfo[k]
-				end
-				if key==nil then
-					key=0
-				end
-				AddInputAlias(p,v,key)			
-			end
-			--绑定总线
-			jstg.devices[i]=p
-			BindInput(p,i,1+slotmask,jstg.network.delay)
-			Print('bind',i,1+slotmask)
-			playerid=playerid+1
-		else
-			local p=CreateInputDevice(true)--创建远程输入
-			jstg.devices[i]=p
-			BindInput(p,i,1+slotmask,jstg.network.delay)
-		end
-		slotmask=slotmask+slotmask
-	end	
-end
-
-function jstg.ChangeInput2()--for watch single player
-	--clear current input devices
-	for i=1,#jstg.devices do
-		BindInput(0,i,0,0)--unbind input
-		ReleaseInputDevice(jstg.devices[i])--release data
-	end
-	jstg.devices={}
-	ResetInput()--reset frame stamp
-	local playerid=1
-	local slotmask=2
-	local i=1
-	if jstg.network.slots[i]=='local' then
-		local p=CreateInputDevice(false)
-		--set key alias
-		local playerkeyinfo=setting.keys
-		local syskeyinfo=setting.keysys
-		if playerid>1 then playerkeyinfo=setting['keys'..playerid] end
-		for k,v in pairs(jstg.syskey) do
-			local key=playerkeyinfo[k]
-			if key==nil then
-				key=syskeyinfo[k]
-			end
-			if key==nil then
-				key=0
-			end
-			AddInputAlias(p,v,key)			
-		end
-		--fill table
-		jstg.devices[i]=p
-		BindInput(p,i,1+slotmask,jstg.network.delay)
-		playerid=playerid+1
-	else--remote
-		local p=CreateInputDevice(true)
-		jstg.devices[i]=p
-		BindInput(p,i,1+slotmask,jstg.network.delay)
-	end
-end
-
-jstg.KeyState={}
-jstg.KeyStatePre={}
-jstg.LastKey=0
-jstg.OldKeyState={}
-
---将虚拟按键转化为按键名
-function jstg.SysVKey2Key(vkey)
-	local keyname=jstg.syskey2[vkey+1]
-	if setting.keysys[keyname] then return setting.keysys[keyname] end
-	if setting.keys[keyname] then return setting.keys[keyname] end
-	if setting.keys2[keyname] then return setting.keys2[keyname] end
-	return 0
-end
-
+---刷新输入状态
+---@param is_pause boolean @是否处于暂停状态
 function jstg.GetInputEx(is_pause)--OLC提供的一个解决方法，解决了非自机输入在rep中检测不到的问题
 	--get players input
 	for i=1,jstg.inputcount do
@@ -274,7 +197,6 @@ function jstg.GetInputEx(is_pause)--OLC提供的一个解决方法，解决了�
 		end
 	end
 end
-
 function jstg.OldGetInputEx(is_pause)--旧方法的备份
 	--get players input
 	for i=1,jstg.inputcount do
@@ -320,6 +242,9 @@ function jstg.OldGetInputEx(is_pause)--旧方法的备份
 	end
 end
 
+---从指定输入槽位刷新输入状态
+---@param i number @槽位
+---@param is_pause boolean @是否处于暂停状态
 function jstg.GetInputSingleEx(i,is_pause)
 	local sk=setting.keys
 	if stage.next_stage then
@@ -350,6 +275,3 @@ function jstg.GetInputSingleEx(i,is_pause)
 		end
 	end
 end
-
-
-

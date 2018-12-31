@@ -500,11 +500,7 @@ end
 ----------------------------------------
 --加载自机
 
-player_list={
-	{'Hakurei Reimu','reimu_player','Reimu'},
-	{'Kirisame Marisa','marisa_player','Marisa'},
-	{'Izayoi Sakuya','sakuya_player','Sakuya'},
-}
+player_list={}
 
 function AddPlayerToPlayerList(displayname,classname,replayname,pos,_replace)
 	if _replace then
@@ -516,6 +512,4 @@ function AddPlayerToPlayerList(displayname,classname,replayname,pos,_replace)
 	end
 end
 
-Include'THlib\\player\\reimu\\reimu.lua'
-Include'THlib\\player\\marisa\\marisa.lua'
-Include'THlib\\player\\sakuya\\sakuya.lua'
+Include'THlib\\player\\player_addon.lua'

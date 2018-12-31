@@ -81,6 +81,7 @@ function ext.pausemenu.frame(self)
 		else
 			self.pos2=self.pos2-1
 		end
+		self.t=4
 		PlaySound('select00',0.3)
 	end
 	if GetLastKey()==setting.keys.down and self.t<=0 then
@@ -89,6 +90,7 @@ function ext.pausemenu.frame(self)
 		else
 			self.pos2=self.pos2+1
 		end
+		self.t=4
 		PlaySound('select00',0.3)
 	end
 	self.pos=(self.pos-1)%(#pause_menu_text)+1
