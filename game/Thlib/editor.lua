@@ -1,6 +1,9 @@
---======================================
---编辑器接口
---======================================
+---=====================================
+---编辑器接口
+---=====================================
+
+---@class editor @和编辑器对接
+editor={}
 
 _editor_class={}
 _editor_cards={}
@@ -129,6 +132,7 @@ function _kill(unit,trigger)
 	end
 	if trigger then Kill(unit) else RawKill(unit) end
 end
+
 function _del(unit,trigger)
 	if IsValid(unit[1]) then
 		for i=1,#unit do
@@ -139,74 +143,80 @@ function _del(unit,trigger)
 	if trigger then Del(unit) else RawDel(unit) end
 end
 
-function RawSetA(self, accel, angle, navi, maxv)--!警告：RawSetA为实验性功能，和SetA冲突，有潜在的兼容性问题
+function RawSetA(self, accel, angle, navi, maxv)
 	self.ax=accel*cos(angle)
 	self.ay=accel*sin(angle)
-	if self.acceleration then
-		--self.acceleration=nil--两套加速度更新逻辑不能相容，使用底层的加速度更新时，加速度+重力系统需要关闭
-	end
 	if navi then self.navi = navi end
 	if maxv~=0 then
-		self.forbidveloc={v=maxv}
+		self.maxv=maxv
 	end
 end
-function SetA(self,accel,angle,maxv,gravity,maxvy,navi)--!警告：和RawSetA冲突
-	--self.ax,self.ay=0,0--两套加速度更新逻辑不能相容,使用加速度+重力的一套时，底层的加速度更新需要关闭
-	self.navi = navi
-	if accel~=0 then
-		self.acceleration={ax=accel*cos(angle),ay=accel*sin(angle)}
-	end
-	if gravity~=0 then
-		self.acceleration = self.acceleration or {}
-		self.acceleration.g = gravity
-	end
+
+function SetA(self,accel,angle,maxv,gravity,maxvy,navi)
+	if navi then self.navi = navi end
+	self.ax=accel*cos(angle)
+	self.ay=accel*sin(angle)
+	self.ag=gravity
 	if maxv~=0 then
-		self.forbidveloc={v=maxv}
+		self.maxv=maxv
 	end
 	if maxvy~=0 then
-		self.forbidveloc = self.forbidveloc or {}
-		self.forbidveloc.vy = maxvy
+		self.maxvy=maxvy
 	end
 end
+
 function _set_a(obj,a,rot,aim)--！潜在的问题：多玩家适配
 	if rot == "original" then rot = atan2(obj.vy, obj.vx) end
 	if aim then rot = rot + Angle(obj,Player(obj)) end
-	obj.acceleration = obj.acceleration or {}
-	local accel = obj.acceleration
-	accel.ax = a * cos(rot)
-	accel.ay = a * sin(rot)
+	obj.ax = a * cos(rot)
+	obj.ay = a * sin(rot)
 end
-function _set_g(obj,g)
-	obj.acceleration = obj.acceleration or {}
-	obj.acceleration.g = g
-end
+
+function _set_g(obj,g) obj.ag = g end
+
 function _forbid_v(obj, v, vx, vy)
-	obj.forbidveloc = obj.forbidveloc or {}
-	local fv = obj.forbidveloc
 	if v ~= "original" then
-		fv.v = v
+		obj.maxv = v
 	end
 	if vx ~= "original" then
-		fv.vx = vx
+		obj.maxvx = vx
 	end
 	if vy ~= "original" then
-		fv.vy = vy
+		obj.maxvy = vy
 	end
 end
-function GetA(obj)
-	local acc = {}
-	if obj.acceleration then acc = obj.acceleration end
-	return acc.ax or 0, acc.ay or 0
-end
-function GetG(obj)
-	local acc = {}
-	if obj.acceleration then acc = obj.acceleration end
-	return acc.g
-end
-function GetFV(obj)
-	local fv = {}
-	if obj.forbidveloc then fv = obj.forbidveloc end
-	return fv.v or 0, fv.vx or 0, fv.vy or 0
+
+function GetA(obj) return obj.ax, obj.ay end
+
+function GetG(obj) return obj.ag end
+
+function GetFV(obj) return obj.maxv, obj.maxvx, obj.maxvy end
+
+---增强版加速度、速度限制、阿基米德螺线支持
+function editor.UserSystemOperation()--模拟内核级操作
+	--合并了三次遍历为一次，优化性能by ETC and OLC
+	local polar,radius,angle,delta,omiga,center
+	for id = 0,15 do
+		for _,obj in ObjList(id) do
+			---[[
+			--assistance of Polar coordinate system
+			polar=obj.polar
+			if polar then
+				radius = polar.radius or 0
+				angle = polar.angle or 0
+				delta = polar.delta
+				if delta then polar.radius = radius + delta end
+				omiga = polar.omiga
+				if omiga then polar.angle = angle + omiga end
+				center = polar.center or {x=0,y=0}
+				radius = polar.radius
+				angle = polar.angle
+				obj.x = center.x + radius * cos(angle)
+				obj.y = center.y + radius * sin(angle)
+			end
+			--]]
+		end
+	end
 end
 
 _can_be_master={[_object]=true,[enemy]=true,[boss]=true,[laser]=true,[bullet]=true}--没用上？？
@@ -569,7 +579,7 @@ smear.func = function(img)--修改by OLC，修复了疯狂重复加载的问题
 	if not lstg.tmpvar.smearcache[img] then
 		smear.cache[img] = img.."_smear_psi"
 		lstg.tmpvar.smearcache[img] = img.."_smear_psi"
-		LoadPS(img.."_smear_psi","THlib\\bullet\\smear.psi",img)
+		LoadPS(img.."_smear_psi","THlib\\smear.psi",img)
 	end
 	return lstg.tmpvar.smearcache[img]
 end
@@ -612,6 +622,7 @@ end
 ----------------------------------------
 --阿基米德螺线 powered by 二要
 --？细节：现有版本的编辑器不再提供该功能
+--？细节：现有版本的data不再对极坐标系统进行计算更新
 
 Include'THlib\\bulletex\\Archimedes.lua'
 
@@ -675,57 +686,4 @@ function RenderObject:render()
 	if self._blend and self._a and self._r and self._g and self._b then
 		SetImgState(self,'',255,255,255,255)
 	end
-end
-
-----------------------------------------
---迟早要干掉的反弹板
---！警告：SB反弹板会炸游戏，不要使用
-
-rebounder = Class(object)
-rebounder.list = {}
-rebounder.size = 0
-function rebounder:init(x,y,length,angle)
-	self.x = x
-	self.y = y
-	self.length = length
-	self.rot = angle
-	self.last_rot = nil
-	self.last_len = nil
-	self.group = GROUP_GHOST
-	self.colli = false
-	self.id = rebounding.AddRebounder(x,y,length,angle)
-	rebounder.list[self.id] = self
-	rebounder.size = rebounder.size + 1
-end
-function rebounder:frame()
-	if self.last_rot ~= self.rot or self.last_len ~= self.length or self.dx ~= 0 or self.dy ~= 0 then
-		rebounding.UpdateRebounder(self.id, self.x, self.y, self.length, self.rot)
-	end
-	task.Do(self)
-end
-function rebounder:colli(obj)
-	if obj.omiga == 0 and not obj.navi then obj.rot = self.rot * 2 - obj.rot end
-end
-function rebounder:kill()
-	rebounding.ReleaseRebounder(self.id)
-	rebounder.list[self.id] = nil
-	rebounder.size = rebounder.size - 1
-end
-function rebounder:del()
-	rebounding.ReleaseRebounder(self.id)
-	rebounder.list[self.id] = nil
-	rebounder.size = rebounder.size - 1
-end
-function PauseRebound()
-	ReboundPause = true
-end
-function ResumeRebound()
-	ReboundPause = false
-end
-function ClearRebound()
-	ReboundPause = false
-	for _,obj in pairs(rebounder.list) do Del(obj) end
-	rebounder.list = {}
-	rebounder.size = 0
-	rebounding.ClearRebound()
 end

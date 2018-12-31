@@ -284,14 +284,23 @@ end
 if not (lfs.attributes('data.zip')==nil) then
     LoadPack('data.zip')
 end
+
 if setting.mod~='launcher' then
-    LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
-elseif lfs.attributes('launcher.lua')==nil then
-    if not lfs.attributes('mod\\'..setting.mod..'.zip')==nil then
-        LoadPack('mod\\'..setting.mod..'.zip')--正常加载启动器
+    if not(lfs.attributes('mod\\'..setting.mod..'.zip')==nil) then
+        LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
+    else
+        --不加载mod
     end
 else
-    --什么也不做
+    if lfs.attributes('launcher.lua')==nil then
+        if not(lfs.attributes('mod\\launcher.zip')==nil) then
+            LoadPack('mod\\launcher.zip')--正常加载启动器
+        else
+            --可能的话使用data.zip里面的启动器
+        end
+    else
+        --使用游戏根目录里面的启动器
+    end
 end
 
 SetSplash(false)

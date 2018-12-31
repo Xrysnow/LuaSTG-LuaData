@@ -355,9 +355,9 @@ function BossSystem:next()
                 mode = 0
             end
         elseif next and not(next.is_sc) then
-            mode = 0
+            mode = 3
         elseif not(next) then
-            mode = 0
+            mode = 3
         end
     end
     if now.t1 == now.t3 then
@@ -368,7 +368,7 @@ function BossSystem:next()
 end
 
 ---设置血条类型
----@param mode number @血条样式(-1无血条，0完整，1非&符中的非，2非&符中的符)
+---@param mode number @血条样式(-1无血条，0完整，1非&符中的非，2非&符中的符, 3完整非)
 function BossSystem:SetHPBar(mode)
     local b = self.boss
     local color1, color2 = Color(0xFFFF8080), Color(0xFFFFFFFF)
@@ -383,6 +383,9 @@ function BossSystem:SetHPBar(mode)
         b.ui.hpbarcolor2 = color2
     elseif mode == 2 then
         b.ui.hpbarcolor1 = color1
+        b.ui.hpbarcolor2 = color1
+    elseif mode == 3 then
+        b.ui.hpbarcolor1 = nil
         b.ui.hpbarcolor2 = color1
     end
 end
@@ -405,7 +408,11 @@ function BossSystem:CastCard(card)
     local name = card.name
     self:MakeSCHist(player, diff, name)
     b.ui.sc_hist = sc_hist[player][diff][name]
-    if name ~= '' then b.ui.sc_name = name end
+    if name ~= '' then
+        --b.ui.sc_name = name
+        last = New(boss.sc_name_obj, b, name)
+        _connect(b, last, 0, true)
+    end
 end
 
 ---建立符卡记录信息
