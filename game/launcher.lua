@@ -6,7 +6,7 @@ local _key_code_to_name=KeyCodeToName()--Linput
 local setting_item={'resx','resy','windowed','vsync','sevolume','bgmvolume','res'}
 local Resolution={{640,480},{800,600},{960,720},{1024,768},{1280,960}}
 
-function format_json(str)
+local function format_json(str)
 	local ret = ''
 	local indent = '	'
 	local level = 0

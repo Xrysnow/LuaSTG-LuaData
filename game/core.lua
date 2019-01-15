@@ -42,7 +42,7 @@ end
 
 ---切关处理
 function ChangeGameStage()
-	jstg.ApplyWorld(GetDefaultWorld())--by ETC，默认world参数由Lscreen提供
+	jstg.ResetWorlds()--by ETC，重置所有world参数
 	
 	lstg.ResetLstgtmpvar()--重置lstg.tmpvar
 	ex.Reset()--重置ex全局变量
@@ -57,10 +57,6 @@ function ChangeGameStage()
 		--Print('RanSeed',lstg.var.ran_seed)
 		ran:Seed(lstg.var.ran_seed)
 	end
-	
-	--lstg.var = DeSerialize(nextRecordStage.stageExtendInfo)
-	--lstg.nextvar = DeSerialize(nextRecordStage.stageExtendInfo)
-	--assert(lstg.var.ran_seed == nextRecordStage.randomSeed)  -- 这两个应该相等
 	
 	--刷新最高分
 	if not stage.next_stage.is_menu then
@@ -103,7 +99,7 @@ function DoFrame()
 	end
 	ObjFrame()
 	if GetCurrentSuperPause()<=0 or stage.nopause then
-		for i=1,#jstg.worlds do
+		for i=1,jstg.GetWorldCount() do
 			jstg.SwitchWorld(i)
 			SetWorldFlag(jstg.worlds[i].world)
 			BoundCheck()
@@ -123,7 +119,6 @@ function DoFrame()
 		CollisionCheck(GROUP_SPELL,GROUP_INDES)
 	end
 	UpdateXY()
-	UpdateSound()
 	AfterFrame()
 	--切关时清空资源和回收对象
 	if stage.next_stage and stage.current_stage then
@@ -148,11 +143,25 @@ function GameExit() end
 ---全局回调函数，底层调用
 
 function GameInit()
-	SetViewMode'world'
+	--加载mod包
+	if setting.mod~='launcher' then
+		Include 'root.lua'
+	else
+		Include 'launcher.lua'
+	end
+	if setting.mod~='launcher' then
+		--_mod_version=_mod_version or 0
+		--if _mod_version>_luastg_version or _mod_version<_luastg_min_support then error(string.format("Mod version and engine version mismatch. Mod version is %.2f, LuaSTG version is %.2f.",_mod_version/100,_luastg_version/100)) end
+	end
+	--最后的准备
+	InitAllClass()--对所有class的回调函数进行整理，给底层调用
+	InitScoreData()--装载玩家存档
+	
+	SetViewMode("world")
 	if stage.next_stage==nil then
 		error('Entrance stage not set.')
 	end
-	SetResourceStatus'stage'
+	SetResourceStatus("stage")
 end
 
 function FrameFunc()
@@ -175,23 +184,3 @@ end
 function FocusLoseFunc() end
 
 function FocusGainFunc() end
-
-----------------------------------------
----加载mod包
-
-if setting.mod~='launcher' then
-	Include 'root.lua'
-else
-	Include 'launcher.lua'
-end
-
-if setting.mod~='launcher' then
-	--_mod_version=_mod_version or 0
-	--if _mod_version>_luastg_version or _mod_version<_luastg_min_support then error(string.format("Mod version and engine version mismatch. Mod version is %.2f, LuaSTG version is %.2f.",_mod_version/100,_luastg_version/100)) end
-end
-
-----------------------------------------
----游戏循环开始前最后的准备
-
-InitAllClass()--对所有class的回调函数进行整理，给底层调用
-InitScoreData()--装载玩家存档

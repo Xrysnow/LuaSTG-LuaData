@@ -5,11 +5,9 @@
 ----------------------------------------
 ---javastage world
 
-jstg.worldcount=1
-jstg.worlds={}
-jstg.worlds[1]=lstg.world
-lstg.world.world=7
-jstg.currentworld=1
+jstg.worldcount=1--world总数
+jstg.worlds={lstg.world}--储存所有world的参数
+jstg.currentworld=1--当前执行渲染的world
 
 ---对传入的world表设置world参数
 ---@param world table @传入的table
@@ -34,9 +32,9 @@ function SetLuaSTGWorld(world,width,height,boundout,sl,sr,sb,st)
 	world.pt=height/2
 	world.boundt=height/2+boundout
 	world.scrl=sl
-	world.scrr=sl+width
+	world.scrr=sr
 	world.scrb=sb
-	world.scrt=sb+height
+	world.scrt=st
 end
 
 ---对传入的world表设置world参数
@@ -48,7 +46,7 @@ end
 ---@param sb number @world底部在屏幕上的位置
 ---@param m number @world的掩码，用于多world
 function SetLuaSTGWorld2(world,width,height,boundout,sl,sb,m)
-	SetLuaSTGWorld(world,width,height,boundout,sl,sr,sb,st)
+	SetLuaSTGWorld(world,width,height,boundout,sl,sl+width,sb,sb+height)
 	world.world=m
 end
 
@@ -56,6 +54,12 @@ end
 ---@param cnt number @world数量
 function jstg.SetWorldCount(cnt)
 	jstg.worldcount=cnt
+end
+
+---返回当前world数量
+---@return number
+function jstg.GetWorldCount()
+	return jstg.worldcount
 end
 
 ---更新world，根据world数量和world掩码激活和设置world
@@ -104,6 +108,15 @@ function jstg.ApplyWorld(world)
 	SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
 end
 
+---清除多world参数
+function jstg.ResetWorlds()
+	jstg.SetWorldCount(1)
+	jstg.worlds={}
+	jstg.worlds[1]=GetDefaultWorld()--Lscreen
+	jstg.SwitchWorld(1)
+	jstg.UpdateWorld()
+end
+
 ---设置为花映冢样式的版面
 function jstg.TestWorld(a)
 	jstg.SetWorldCount(2)
@@ -122,7 +135,7 @@ end
 ---(设置list中所有obj的attr属性为value)
 ---@param l table @传入的table
 ---@param a number|string @索引
----@param v object|number|boolean|string|table|function|userdata|thread|nil @万物皆允
+---@param v object any @万物皆允
 function ListSet(l,a,v)
 	for i=1,#l do
 		l[i][a]=v
@@ -132,7 +145,7 @@ end
 -- TODO:以后这个加入到Lmath豪华套餐里面吧
 ---传入一个table，随机获取table中的一个对象
 ---@param list table @传入的table
----@return object|number|boolean|string|table|function|userdata|thread|nil @万物皆允
+---@return object any @万物皆允
 function ran:List(list)
 	return list[ran:Int(1,#list)]
 end
@@ -172,8 +185,8 @@ end
 ----------------------------------------
 ---javastage player
 
-jstg.player_template={}
-jstg.players={}
+--jstg.player_template={}--unkown
+jstg.players={}--储存实例化的自机对象
 
 ---摇奖，获取一个自机对象
 ---@param o object|nil @要获取自机对象的对象，不传入则自动获取
@@ -233,7 +246,7 @@ function IsPlayerEnd()
 end
 
 ---设置当前的自机对象
----@param p object @要设置为当前自机的对象
+---@param p object|nil @要设置为当前自机的对象
 function SetPlayer(p)
 	jstg.current_player=p
 end

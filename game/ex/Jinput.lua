@@ -7,10 +7,12 @@ local LOG_MODULE_NAME="[jstg][player|input]"
 ----------------------------------------
 ---Input
 
+jstg.keys={}--各个输入槽位对应的当前帧按键状态
+jstg.keypres={}--各个输入槽位对应的前一帧按键状态
 jstg.KeyState={}
 jstg.KeyStatePre={}
 jstg.LastKey=0--最后输入的按键对应的VKEYcode
-jstg.OldKeyState={}
+jstg.OldKeyState={}--这屌玩意一直是空的表，不知道干嘛用的，也有可能是一个引用类型的表
 
 ---旧函数，获取最后按下的按键
 _GetLastKey=GetLastKey
@@ -65,24 +67,26 @@ KeyTrigger = KeyIsPressed
 ----------------------------------------
 ---Player Input
 
---extern jstg.player_template={}
---extern jstg.players={}
-jstg.keys={}--各个输入槽位对应的当前帧按键状态
-jstg.keypres={}--各个输入槽位对应的前一帧按键状态
-jstg.keymaps={}
-jstg.inputcount=1--当前输入槽位数量
+--jstg.keymaps={}--unkown
+--jstg.splitplayer=false--unkown
 
-jstg.splitplayer=false
+jstg.inputcount=1--当前输入槽位数量
 jstg.enable_player=false--若进入关卡初始化后该值为false，则代表该mod为旧mod
 
----设置自机输入槽位
+---更新自机输入槽位总数
 ---@param count number @自机输入槽位数量
-function jstg.CreateInput(count,delay)
+function jstg.CreateInput(count)
 	jstg.inputcount=count
-	for i=count,1,-1 do
+	for i=count,0,-1 do
 		jstg.keys[i]={}
 		jstg.keypres[i]={}
 	end
+end
+
+---获得自机输入槽位总数
+---@return number
+function jstg.GetInputCount()
+	return jstg.inputcount
 end
 
 ---创建自机，ex+版
@@ -92,17 +96,12 @@ function jstg.CreatePlayers()
 	local last=New(_G[lstg.var.player_name],1)
 	jstg.players={last}
 	jstg.CreateInput(1)
-	jstg.UpdateWorld()
-	--lstg.var.player_name2='marisa_player'
-	--jstg.network.slots[2]='local'
-	--jstg.network.slots[1]='local'
-	--jstg.MultiPlayer()
 	last.key=jstg.keys[1]
 	last.keypre=jstg.keypres[1]
-
+	
 	if lstg.var.player_name2 then
 		last.world=2
-	
+		
 		jstg.CreateInput(2)
 		last.key=jstg.keys[1]
 		last.keypre=jstg.keypres[1]
@@ -120,17 +119,15 @@ function jstg.Compatible()--for old mod
 	jstg.players={player}
 	local last=player
 	jstg.CreateInput(1)
-	jstg.worlds={lstg.world}
-	jstg.worldcount=1
-	lstg.world.world=7
-	jstg.UpdateWorld()
+	
 	if last then
 		last.key=jstg.keys[1]
 		last.keypre=jstg.keypres[1]
 	end
+	
 	if lstg.var.player_name2 then
 		last.world=2
-	
+		
 		jstg.CreateInput(2)
 		last.key=jstg.keys[1]
 		last.keypre=jstg.keypres[1]
@@ -149,7 +146,7 @@ end
 ---@param is_pause boolean @是否处于暂停状态
 function jstg.GetInputEx(is_pause)--OLC提供的一个解决方法，解决了非自机输入在rep中检测不到的问题
 	--get players input
-	for i=1,jstg.inputcount do
+	for i=1,jstg.GetInputCount() do
 		KeyStatePre = {}
 		KeyState = jstg.keys[i]
 		jstg.GetInputSingleEx(i,is_pause)
@@ -257,23 +254,21 @@ function jstg.GetInputSingleEx(i,is_pause)
 			KeyStatePre[k] = KeyState[k]
 		end
 	end
-
+	
 	-- 不是录像时更新按键状态
 	if not ext.replay.IsReplay() then
 		for k,v in pairs(sk) do
 			KeyState[k] = GetVKeyStateEx(jstg.network.playerkeymask[i],jstg.syskey[k])
 		end
 	end
-
+	
 	if not is_pause then
 		if ext.replay.IsRecording() then
 			-- 录像模式下记录当前帧的按键
 			replayWriter:Record(KeyState)
 		elseif ext.replay.IsReplay() then
 			-- 回放时载入按键状态
-			--Print("ReadReplay")
 			replayReader:Next(KeyState)
-			--assert(replayReader:Next(KeyState), "Unexpected end of replay file.")
 		end
 	end
 end

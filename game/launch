@@ -183,14 +183,14 @@ default_setting=
 		special=KEY.C,
 	},
 	keys2={
-		up=104,
-		down=101,
-		left=100,
-		right=102,
-		slow=65,
-		shoot=83,
-		spell=68,
-		special=70,
+		up=KEY.NUMPAD5,
+		down=KEY.NUMPAD2,
+		left=KEY.NUMPAD1,
+		right=KEY.NUMPAD3,
+		slow=KEY.A,
+		shoot=KEY.S,
+		spell=KEY.D,
+		special=KEY.F,
 	},
 	keysys={
 		repfast=KEY.CTRL,
@@ -260,14 +260,12 @@ if updatelib then
 	lfs.chdir('..')
 end
 
-if not (lfs.attributes('Library\\data.zip')==nil) then
-	LoadPack('Library\\data.zip')
+for _,v in ipairs({"data","background","se","music","font","player"}) do
+	local packpath="Library\\"..v..".zip"
+	if not (lfs.attributes(packpath)==nil) then
+		LoadPack(packpath)
+	end
 end
-LoadPack('Library\\background.zip')
-LoadPack('Library\\se.zip')
-LoadPack('Library\\music.zip')
-LoadPack('Library\\font.zip')
-LoadPack('Library\\player.zip')
 
 if setting.mod~='launcher' then
 	if not(lfs.attributes('mod\\'..setting.mod..'.zip')==nil) then

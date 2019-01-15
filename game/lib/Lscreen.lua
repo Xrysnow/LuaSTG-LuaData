@@ -54,16 +54,18 @@ local RAW_DEFAULT_WORLD={--默认的world参数，只读
 	boundl=-224,boundr=224,boundb=-256,boundt=256,
 	scrl=32,scrr=416,scrb=16,scrt=464,
 	pl=-192,pr=192,pb=-224,pt=224,
+	world=15,
 }
 local DEFAULT_WORLD={--默认的world参数，可更改
 	l=-192,r=192,b=-224,t=224,
 	boundl=-224,boundr=224,boundb=-256,boundt=256,
 	scrl=32,scrr=416,scrb=16,scrt=464,
 	pl=-192,pr=192,pb=-224,pt=224,
+	world=15,
 }
 
---用于设置默认world参数
-function OriginalSetDefaultWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
+---用于设置默认world参数
+function OriginalSetDefaultWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt,m)
 	local w={}
 	w.l=l
 	w.r=r
@@ -81,24 +83,26 @@ function OriginalSetDefaultWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
 	w.pr=pr
 	w.pb=pb
 	w.pt=pt
+	w.world=m
 	DEFAULT_WORLD=w
 end
 
-function SetDefaultWorld(l,b,w,h,bound)
-	local s=bound or 32
+function SetDefaultWorld(l,b,w,h,bound,m)
 	OriginalSetDefaultWorld(
-	--l,r,b,t,
-	(-w/2),(w/2),(-h/2),(h/2),
-	--bl,br,bb,bt,
-	(-w/2)-s,(w/2)+s,(-h/2)-s,(h/2)+s,
-	--sl,sr,sb,st,
-	(l),(l+w),(b),(b+h),
-	--pl,pr,pb,pt
-	(-w/2),(w/2),(-h/2),(h/2)
+		--l,r,b,t,
+		(-w/2),(w/2),(-h/2),(h/2),
+		--bl,br,bb,bt,
+		(-w/2)-bound,(w/2)+bound,(-h/2)-bound,(h/2)+bound,
+		--sl,sr,sb,st,
+		(l),(l+w),(b),(b+h),
+		--pl,pr,pb,pt
+		(-w/2),(w/2),(-h/2),(h/2),
+		--world mask
+		m
 	)
 end
 
---用于重置world参数
+---用于重置world参数
 function RawGetDefaultWorld()
 	local w={}
 	for k,v in pairs(RAW_DEFAULT_WORLD) do
@@ -134,8 +138,8 @@ function ResetWorld()
 	SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
 end
 
---用于设置world参数
-function OriginalSetWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
+---用于设置world参数
+function OriginalSetWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt,m)
 	local w=lstg.world
 	w.l=l
 	w.r=r
@@ -153,19 +157,23 @@ function OriginalSetWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
 	w.pr=pr
 	w.pb=pb
 	w.pt=pt
+	w.world=m
 end
 
-function SetWorld(l,b,w,h,bound)
-	local s=bound or 32
+function SetWorld(l,b,w,h,bound,m)
+	bound=bound or 32
+	m = m or 15
 	OriginalSetWorld(
-	--l,r,b,t,
-	(-w/2),(w/2),(-h/2),(h/2),
-	--bl,br,bb,bt,
-	(-w/2)-s,(w/2)+s,(-h/2)-s,(h/2)+s,
-	--sl,sr,sb,st,
-	(l),(l+w),(b),(b+h),
-	--pl,pr,pb,pt
-	(-w/2),(w/2),(-h/2),(h/2)
+		--l,r,b,t,
+		(-w/2),(w/2),(-h/2),(h/2),
+		--bl,br,bb,bt,
+		(-w/2)-bound,(w/2)+bound,(-h/2)-bound,(h/2)+bound,
+		--sl,sr,sb,st,
+		(l),(l+w),(b),(b+h),
+		--pl,pr,pb,pt
+		(-w/2),(w/2),(-h/2),(h/2),
+		--world mask
+		m
 	)
 	SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
 end
@@ -242,7 +250,7 @@ function SetViewMode(mode)
 	else error('Invalid arguement.') end
 end
 
-function OldWorldToScreen(x,y)--虽然能用但是适应性不强，日后可能去除
+function WorldToUI(x,y)
 	local w=lstg.world
 	return w.scrl+(w.scrr-w.scrl)*(x-w.l)/(w.r-w.l),w.scrb+(w.scrt-w.scrb)*(y-w.b)/(w.t-w.b)
 end
