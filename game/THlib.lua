@@ -23,6 +23,7 @@ Include'ex\\javastage.lua'
 Include'ex\\crazystorm.lua'
 Include'ex\\system.lua'
 Include'ex\\systems\\act7\\system_act7.lua'
+Include'sp\\sp.lua'--OLC神的sp加强库
 
 ---在autorun文件夹下面的lua脚本会自动执行，加载时机为data和mod之间，可能会被mod里面的定义覆盖
 local function autorun()

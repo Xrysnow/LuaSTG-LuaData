@@ -30,6 +30,21 @@ function lstg.Log(level,module,str, ... )
         level=LSTG_LOG_LEVEL[level]
     end
     if level>=LSTG_LOG_MIN_LEVEL then
-        lstg.Print(LSTG_LOG_LEVEL[level]..module..str, ... )
+        lstg.Print("\n"..LSTG_LOG_LEVEL[level]..module..str, ... )
     end
+end
+
+----------------------------------------
+---simple MessageBox
+
+local ffi = require("ffi")
+ffi.cdef[[
+    int MessageBoxA(void *w, const char *txt, const char *cap, int type);
+]]
+
+---简单的警告弹窗
+---@param msg string
+function lstg.MsgBoxLog(msg)
+    local ret=ffi.C.MessageBoxA(nil, tostring(msg), "LuaSTG Waring", 1+48)
+    if ret==2 then os.exit() end
 end

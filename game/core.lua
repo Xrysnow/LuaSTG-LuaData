@@ -23,7 +23,6 @@ lstg.DoFile("lib\\Ltask.lua")--task
 lstg.DoFile("lib\\Lstage.lua")--stage关卡系统
 lstg.DoFile("lib\\Ltext.lua")--文字渲染
 lstg.DoFile("lib\\Lscoredata.lua")--玩家存档
-lstg.DoFile("sp\\sp.lua")--OLC神的sp加强库
 
 ----------------------------------------
 ---用户定义的一些函数
