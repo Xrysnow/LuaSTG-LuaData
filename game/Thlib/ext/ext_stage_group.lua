@@ -174,7 +174,7 @@ function stage.group.frame_sc_pr(self)
 		end
 		lstg.var.lifeleft=0
 	end
-	if ext.GetPauseMenuOrder()=='Give up and Retry' then
+	if ext.GetPauseMenuOrder()=='Give up and Retry' or ext.GetPauseMenuOrder()=='Restart' then
 		stage.Restart()
 		lstg.tmpvar.pause_menu_text=nil
 		lstg.var.timeslow=nil

@@ -37,60 +37,22 @@ function ext.GetPauseMenuOrder()
 	return ext.pause_menu_order
 end
 
+---发送暂停菜单的命令，命令有以下类型：
+---'Continue'
+---'Return to Title'
+---'Quit and Save Replay'
+---'Give up and Retry'
+---'Restart'
+---'Replay Again'
+---@param msg string
+function ext.PushPauseMenuOrder(msg)
+	ext.pause_menu_order=msg
+end
+
 ----------------------------------------
 ---extra game loop
 
 function GameStateChange() end
-
-function GetInput()--不再使用，已转为jstg.GetInputEX
-	if stage.next_stage then
-		-- 把一些转场的破事放到这里处理，NOT GOOD
-		local w1=GetDefaultWorld()
-		jstg.ApplyWorld(w1)
-		
-		ResetLstgtmpvar()--重置lstg.tmpvar
-		ex.Reset()--重置ex全局变量
-		
-		if lstg.nextvar then
-			lstg.var=lstg.nextvar
-			lstg.nextvar =nil
-		end
-		-- 初始化随机数
-		if lstg.var.ran_seed then
-			--Print('RanSeed',lstg.var.ran_seed)
-			ran:Seed(lstg.var.ran_seed)
-		end
-		
-		KeyStatePre = {}
-		if not stage.next_stage.is_menu then
-			if scoredata.hiscore == nil then
-				scoredata.hiscore = {}
-			end
-			lstg.tmpvar.hiscore = scoredata.hiscore[stage.next_stage.stage_name..'@'..tostring(lstg.var.player_name)]
-		end
-	else
-		-- 刷新KeyStatePre
-		for k, v in pairs(setting.keys) do
-			KeyStatePre[k] = KeyState[k]
-		end
-	end
-	
-	-- 不是录像时更新按键状态
-	if not ext.replay.IsReplay() then
-		for k,v in pairs(setting.keys) do
-			KeyState[k] = GetKeyState(v)
-		end
-	end
-	
-	if ext.replay.IsRecording() then
-		-- 录像模式下记录当前帧的按键
-		replayWriter:Record(KeyState)
-	elseif ext.replay.IsReplay() then
-		-- 回放时载入按键状态
-		replayReader:Next(KeyState)
-		--assert(replayReader:Next(KeyState), "Unexpected end of replay file.")
-	end
-end
 
 function DoFrameEx()
 	if ext.replay.IsReplay() then
@@ -161,7 +123,6 @@ function FrameFunc()
 end
 
 function RenderFunc()
-	--！更改：只有关卡和object的渲染丢到了if里面，其他的正常每帧渲染
 	BeginScene()
 	SetWorldFlag(1)
 	BeforeRender()
@@ -193,5 +154,58 @@ function FocusLoseFunc()
 		if not stage.current_stage.is_menu then
 			ext.pop_pause_menu=true
 		end
+	end
+end
+
+--legecy
+
+--不再使用，已转为jstg.GetInputEX
+function GetInput()
+	if stage.next_stage then
+		-- 把一些转场的破事放到这里处理，NOT GOOD
+		local w1=GetDefaultWorld()
+		jstg.ApplyWorld(w1)
+		
+		ResetLstgtmpvar()--重置lstg.tmpvar
+		ex.Reset()--重置ex全局变量
+		
+		if lstg.nextvar then
+			lstg.var=lstg.nextvar
+			lstg.nextvar =nil
+		end
+		-- 初始化随机数
+		if lstg.var.ran_seed then
+			--Print('RanSeed',lstg.var.ran_seed)
+			ran:Seed(lstg.var.ran_seed)
+		end
+		
+		KeyStatePre = {}
+		if not stage.next_stage.is_menu then
+			if scoredata.hiscore == nil then
+				scoredata.hiscore = {}
+			end
+			lstg.tmpvar.hiscore = scoredata.hiscore[stage.next_stage.stage_name..'@'..tostring(lstg.var.player_name)]
+		end
+	else
+		-- 刷新KeyStatePre
+		for k, v in pairs(setting.keys) do
+			KeyStatePre[k] = KeyState[k]
+		end
+	end
+	
+	-- 不是录像时更新按键状态
+	if not ext.replay.IsReplay() then
+		for k,v in pairs(setting.keys) do
+			KeyState[k] = GetKeyState(v)
+		end
+	end
+	
+	if ext.replay.IsRecording() then
+		-- 录像模式下记录当前帧的按键
+		replayWriter:Record(KeyState)
+	elseif ext.replay.IsReplay() then
+		-- 回放时载入按键状态
+		replayReader:Next(KeyState)
+		--assert(replayReader:Next(KeyState), "Unexpected end of replay file.")
 	end
 end

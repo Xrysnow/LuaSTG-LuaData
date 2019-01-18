@@ -152,6 +152,48 @@ function camera_setter:render()
 	SetViewMode'world'
 end
 
+----------------------------------------
+---一些效果
+
 LoadFX('boss_distortion', 'shader\\boss_distortion.fx')
+CreateRenderTarget("_boss_distortion_render_buffer")
+
+local RENDER_BUFFER_NAME="_boss_distortion_render_buffer"
+local WARP_EFFECT_NAME="boss_distortion"
+
+---开始捕获用于执行扭曲特效的画面
+function background.WarpEffectCapture()
+	if IsValid(_boss) then
+		PushRenderTarget(RENDER_BUFFER_NAME)
+		RenderClear(Color(0,0,0,0))
+	end
+end
+
+---停止捕获用于执行扭曲特效的画面并应用扭曲特效、绘制出来
+function background.WarpEffectApply()
+	if IsValid(_boss) then
+		PopRenderTarget(RENDER_BUFFER_NAME)
+		
+		local x,y = WorldToScreen(_boss.x,_boss.y)
+		local x1 = x * screen.scale
+		local y1 = (screen.height - y) * screen.scale
+		local fxr = _boss.fxr or 163
+		local fxg = _boss.fxg or 73
+		local fxb = _boss.fxb or 164
+		PostEffect(RENDER_BUFFER_NAME,WARP_EFFECT_NAME, "", {
+			centerX = x1,
+			centerY = y1,
+			size = _boss.aura_alpha*200*lstg.scale_3d,
+			color = Color(125,fxr,fxg,fxb),
+			colorsize = _boss.aura_alpha*200*lstg.scale_3d,
+			arg=1500*_boss.aura_alpha/128*lstg.scale_3d,
+			timer = _boss.timer
+		})
+	end
+end
+
+
+Include'THlib\\background\\temple\\temple.lua'
+Include'THlib\\background\\spellcard\\spellcard.lua'
 
 Include'THlib\\background\\background_addon.lua'
