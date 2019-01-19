@@ -76,7 +76,7 @@ end
 function combinNum(ord,sum)
 	if sum<0 or ord<0 then error("Can't get combinatorial of minus numbers.") end
 	ord=int(ord)
-	sun=int(sum)
+	sum=int(sum)
 	return Factorial(sum)/(Factorial(ord)*Factorial(sum-ord))
 end
 

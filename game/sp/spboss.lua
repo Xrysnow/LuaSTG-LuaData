@@ -16,10 +16,6 @@ local function _log(...)
     end
 end
 
-Print = function(...)
-    lstg.SystemLog(table.concat({...}, "\t"))
-end
-
 ---@class sp.boss
 local lib = {}
 local SCREEN_SCALE = 1 --坐标系倍率，1为常规坐标系
