@@ -1,9 +1,9 @@
---======================================
---luastg replay
---======================================
+---======================================
+---luastg replay
+---======================================
 
 ----------------------------------------
---replay
+---replay
 
 ext.replay={}
 
@@ -13,7 +13,7 @@ if not plus.DirectoryExists(REPLAY_DIR) then
 	plus.CreateDirectory(REPLAY_DIR)
 end
 
-local replayManager=plus.ReplayManager(REPLAY_DIR.."\\"..setting.mod)
+local replayManager=nil --replay管理器
 local replayFilename=nil--当前打开的Replay文件名称
 local replayInfo=nil    --当前打开的Replay文件信息
 local replayStageIdx=1  --当前正在播放的关卡
@@ -22,7 +22,7 @@ local replayStages={}   --记录所有关卡的录像数据
 replayWriter=nil--帧记录器
 replayReader=nil--帧读取器
 
-function ext.replay.IsReplay()--兼容性接口
+function ext.replay.IsReplay()
 	return replayReader ~= nil
 end
 
@@ -79,16 +79,19 @@ function ext.reload()
 	replayManager = plus.ReplayManager(REPLAY_DIR.."\\"..setting.mod)
 end
 
-----------------------------------------
---关卡切换增强功能
+ext.reload()--加载一次replay管理器
 
---! @brief 设置场景
---! @param mode 录像模式，可选none\load\save
---! @param path 录像文件路径（可选）
---! @param stage 关卡名称
---! 当mode==none时，参数stage用于表明下一个跳转的场景
---! 当mode==load时，参数path有效，指明从path录像文件中加载场景stage的录像数据
---! 当mode==save时，参数path无效，使用stage指定场景名称并开始录像
+----------------------------------------
+---关卡切换增强功能
+---用于支持replay
+
+---设置场景
+---当mode="none"时，参数stage用于表明下一个跳转的场景
+---当mode="load"时，参数path有效，指明从path录像文件中加载场景stage的录像数据
+---当mode="save"时，参数path无效，使用stage指定场景名称并开始录像
+---@param mode string @none, load, save录像模式
+---@param path string @录像文件路径（可选）
+---@param stageName string @关卡名称
 function stage.Set(mode, path, stageName)
 	Print('Set',mode,path,stageName)
 	if mode == "load" and stage.next_stage then return end --防止放replay时转场两次
@@ -206,7 +209,7 @@ function stage.Set(mode, path, stageName)
 	end
 end
 
---! @brief 重新开始场景
+---重新开始场景
 function stage.Restart()
 	stage.preserve_res = true  -- 保留资源在转场时不清空
 	if ext.replay.IsReplay() then

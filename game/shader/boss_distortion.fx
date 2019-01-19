@@ -67,7 +67,7 @@ float4 PS_MainPass(float4 position:POSITION, float2 uv:TEXCOORD0):COLOR
 		texColor.g = ak * resultColor.g + (1 - ak) * texColor.g;
 		texColor.b = ak * resultColor.b + (1 - ak) * texColor.b;
 		}
-		texColor.a = 1;
+	texColor.a = 1;
     return texColor;
 }
 

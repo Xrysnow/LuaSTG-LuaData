@@ -2,7 +2,6 @@ stage_init=stage.New('init',true,true)
 function stage_init:init()
     New(mask_fader,'open')
     jstg.enable_player=true
-    jstg.worldcount=1 --do not render twice
 end
 function stage_init:frame()
     if self.timer>=30 then stage.Set('none', 'menu') end
@@ -35,7 +34,6 @@ function stage_menu:init()
     local p1ok=1
     local p2ok=1
     jstg.enable_player=true
-    jstg.worldcount=1 --do not render twice
     if _title_flag==nil then _title_flag=true else New(mask_fader,'open') end
     --
     local function ExitGame()

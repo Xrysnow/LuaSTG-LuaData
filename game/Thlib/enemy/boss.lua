@@ -1,10 +1,11 @@
---======================================
---th style boss
---======================================
+---=====================================
+---th style boss
+---=====================================
 
 ----------------------------------------
---boss base
+---boss base
 
+---@class boss @东方风boss
 boss = Class(enemybase)
 
 function boss:init(x, y, name, cards, bg, diff)
@@ -79,7 +80,7 @@ function boss:del()
 end
 
 ----------------------------------------
---boss函数库和资源
+---boss函数库和资源
 
 local patch="Thlib\\enemy\\"
 

@@ -7,8 +7,6 @@ function temple_background:init()
 	LoadImageFromFile('temple_road','THlib\\background\\temple\\road.png')
 	LoadImageFromFile('temple_ground','THlib\\background\\temple\\ground.png')
 	LoadImageFromFile('temple_pillar','THlib\\background\\temple\\pillar.png')
-	LoadModel('test','THlib\\background\\temple\\1.obj')
-	LoadImageFromFile('reimut.bmp','THlib\\background\\temple\\reimut.bmp')
 	--set 3d camera and fog
 	Set3D('eye',0,2.5,-4)
 	--Set3D('eye',0,20,20)
@@ -30,12 +28,8 @@ end
 
 function temple_background:render()
 	SetViewMode'3d'
-
-	local showboss = IsValid(_boss)
-	if showboss then
-        PostEffectCapture()
-    end
-
+	
+	background.WarpEffectCapture()
 
 	for j=0,4 do
 		local dz=j*2-math.mod(self.z,2)
@@ -48,25 +42,9 @@ function temple_background:render()
 		temple_background.draw_pillar( 0.85,dz+0.2,1.8,0,0.15)
 		temple_background.draw_pillar(-0.85,dz+0.2,1.8,0,0.15)
 	end
-
-
-	if showboss then
-		local x,y = WorldToScreen(_boss.x,_boss.y)
-		local x1 = x * screen.scale
-		local y1 = (screen.height - y) * screen.scale
-		local fxr = _boss.fxr or 163
-		local fxg = _boss.fxg or 73
-		local fxb = _boss.fxb or 164
-		PostEffectApply("boss_distortion", "", {
-			centerX = x1,
-			centerY = y1,
-			size = _boss.aura_alpha*200*lstg.scale_3d,
-			color = Color(125,fxr,fxg,fxb),
-			colorsize = _boss.aura_alpha*200*lstg.scale_3d,
-			arg=1500*_boss.aura_alpha/128*lstg.scale_3d,
-			timer = self.timer
-        })
-	end
+	
+	
+	background.WarpEffectApply()
 	SetViewMode'world'
 end
 

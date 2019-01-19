@@ -1,10 +1,11 @@
---======================================
---luastg screen
---======================================
+---=====================================
+---luastg screen
+---=====================================
 
 ----------------------------------------
---screen
+---screen
 
+---@class screen
 screen={}
 
 function ResetScreen()
@@ -14,6 +15,7 @@ function ResetScreen()
 		screen.scale=setting.resy/screen.height
 		screen.dx=(setting.resx-screen.scale*screen.width)*0.5
 		screen.dy=0
+		lstg.scale_3d=0.007*screen.scale
 		ResetWorld()
 	else
 		--用于启动器
@@ -22,8 +24,28 @@ function ResetScreen()
 		screen.scale=setting.resx/screen.width
 		screen.dx=0
 		screen.dy=(setting.resy-screen.scale*screen.height)*0.5
+		lstg.scale_3d=0.007*screen.scale
 		lstg.world={l=-192,r=192,b=-224,t=224,boundl=-224,boundr=224,boundb=-256,boundt=256,scrl=6,scrr=390,scrb=16,scrt=464,pl=-192,pr=192,pb=-224,pt=224}
 		SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
+	end
+end
+
+function ResetScreen2()
+	if setting.resx>setting.resy then
+		screen.width=640
+		screen.height=480
+		screen.scale=setting.resy/screen.height
+		screen.dx=(setting.resx-screen.scale*screen.width)*0.5
+		screen.dy=0
+		lstg.scale_3d=0.007*screen.scale
+	else
+		--用于启动器
+		screen.width=396
+		screen.height=528
+		screen.scale=setting.resx/screen.width
+		screen.dx=0
+		screen.dy=(setting.resy-screen.scale*screen.height)*0.5
+		lstg.scale_3d=0.007*screen.scale
 	end
 end
 
@@ -32,16 +54,18 @@ local RAW_DEFAULT_WORLD={--默认的world参数，只读
 	boundl=-224,boundr=224,boundb=-256,boundt=256,
 	scrl=32,scrr=416,scrb=16,scrt=464,
 	pl=-192,pr=192,pb=-224,pt=224,
+	world=15,
 }
 local DEFAULT_WORLD={--默认的world参数，可更改
 	l=-192,r=192,b=-224,t=224,
 	boundl=-224,boundr=224,boundb=-256,boundt=256,
 	scrl=32,scrr=416,scrb=16,scrt=464,
 	pl=-192,pr=192,pb=-224,pt=224,
+	world=15,
 }
 
---用于设置默认world参数
-function OriginalSetDefaultWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
+---用于设置默认world参数
+function OriginalSetDefaultWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt,m)
 	local w={}
 	w.l=l
 	w.r=r
@@ -59,24 +83,26 @@ function OriginalSetDefaultWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
 	w.pr=pr
 	w.pb=pb
 	w.pt=pt
+	w.world=m
 	DEFAULT_WORLD=w
 end
 
-function SetDefaultWorld(l,b,w,h,bound)
-	local s=bound or 32
+function SetDefaultWorld(l,b,w,h,bound,m)
 	OriginalSetDefaultWorld(
-	--l,r,b,t,
-	(-w/2),(w/2),(-h/2),(h/2),
-	--bl,br,bb,bt,
-	(-w/2)-s,(w/2)+s,(-h/2)-s,(h/2)+s,
-	--sl,sr,sb,st,
-	(l),(l+w),(b),(b+h),
-	--pl,pr,pb,pt
-	(-w/2),(w/2),(-h/2),(h/2)
+		--l,r,b,t,
+		(-w/2),(w/2),(-h/2),(h/2),
+		--bl,br,bb,bt,
+		(-w/2)-bound,(w/2)+bound,(-h/2)-bound,(h/2)+bound,
+		--sl,sr,sb,st,
+		(l),(l+w),(b),(b+h),
+		--pl,pr,pb,pt
+		(-w/2),(w/2),(-h/2),(h/2),
+		--world mask
+		m
 	)
 end
 
---用于重置world参数
+---用于重置world参数
 function RawGetDefaultWorld()
 	local w={}
 	for k,v in pairs(RAW_DEFAULT_WORLD) do
@@ -112,8 +138,8 @@ function ResetWorld()
 	SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
 end
 
---用于设置world参数
-function OriginalSetWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
+---用于设置world参数
+function OriginalSetWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt,m)
 	local w=lstg.world
 	w.l=l
 	w.r=r
@@ -131,25 +157,31 @@ function OriginalSetWorld(l,r,b,t,bl,br,bb,bt,sl,sr,sb,st,pl,pr,pb,pt)
 	w.pr=pr
 	w.pb=pb
 	w.pt=pt
+	w.world=m
 end
 
-function SetWorld(l,b,w,h,bound)
-	local s=bound or 32
+function SetWorld(l,b,w,h,bound,m)
+	bound=bound or 32
+	m = m or 15
 	OriginalSetWorld(
-	--l,r,b,t,
-	(-w/2),(w/2),(-h/2),(h/2),
-	--bl,br,bb,bt,
-	(-w/2)-s,(w/2)+s,(-h/2)-s,(h/2)+s,
-	--sl,sr,sb,st,
-	(l),(l+w),(b),(b+h),
-	--pl,pr,pb,pt
-	(-w/2),(w/2),(-h/2),(h/2)
+		--l,r,b,t,
+		(-w/2),(w/2),(-h/2),(h/2),
+		--bl,br,bb,bt,
+		(-w/2)-bound,(w/2)+bound,(-h/2)-bound,(h/2)+bound,
+		--sl,sr,sb,st,
+		(l),(l+w),(b),(b+h),
+		--pl,pr,pb,pt
+		(-w/2),(w/2),(-h/2),(h/2),
+		--world mask
+		m
 	)
 	SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
 end
 
+ResetScreen()--先初始化一次，！！！注意不能漏掉这一步
+
 ----------------------------------------
---3d
+---3d
 
 lstg.view3d={
 	eye={0,0,-1},
@@ -188,11 +220,7 @@ function Set3D(key,a,b,c)
 end
 
 ----------------------------------------
---视口、投影等的转换和坐标映射
-
-ResetScreen()--先重置一次，初始化各种数据，！！！注意不能漏掉这一步
-
-lstg.scale_3d=0.007*screen.scale--不是很明白这个参数……
+---视口、投影等的转换和坐标映射
 
 function SetViewMode(mode)
 	lstg.viewmode=mode
@@ -222,7 +250,7 @@ function SetViewMode(mode)
 	else error('Invalid arguement.') end
 end
 
-function OldWorldToScreen(x,y)--虽然能用但是适应性不强，日后可能去除
+function WorldToUI(x,y)
 	local w=lstg.world
 	return w.scrl+(w.scrr-w.scrl)*(x-w.l)/(w.r-w.l),w.scrb+(w.scrt-w.scrb)*(y-w.b)/(w.t-w.b)
 end

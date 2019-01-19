@@ -1,9 +1,9 @@
---======================================
---stage group
---======================================
+---=====================================
+---stage group
+---=====================================
 
 ----------------------------------------
---关卡组
+---关卡组
 
 stage.group={}
 stage.groups={}
@@ -174,7 +174,7 @@ function stage.group.frame_sc_pr(self)
 		end
 		lstg.var.lifeleft=0
 	end
-	if ext.GetPauseMenuOrder()=='Give up and Retry' then
+	if ext.GetPauseMenuOrder()=='Give up and Retry' or ext.GetPauseMenuOrder()=='Restart' then
 		stage.Restart()
 		lstg.tmpvar.pause_menu_text=nil
 		lstg.var.timeslow=nil
@@ -202,9 +202,9 @@ end
 function stage.group.render(self)
 	SetViewMode'ui'
 	RenderClear(Color(255,0,0,0))
-	ui.DrawFrame()
+	ui.DrawFrame(self)
 	if lstg.var.init_player_data then
-		ui.DrawScore()
+		ui.DrawScore(self)
 	end
 	SetViewMode'world'
 	RenderClear(Color(255,0,0,0))

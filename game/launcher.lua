@@ -6,7 +6,7 @@ local _key_code_to_name=KeyCodeToName()--Linput
 local setting_item={'resx','resy','windowed','vsync','sevolume','bgmvolume','res'}
 local Resolution={{640,480},{800,600},{960,720},{1024,768},{1280,960}}
 
-function format_json(str)
+local function format_json(str)
 	local ret = ''
 	local indent = '	'
 	local level = 0
@@ -471,7 +471,7 @@ function simple_menu_mod:frame()
 end
 
 function simple_menu_mod:render()
-	DrawMODTTF(self.title,self._list,self._pos,self.x,self.y,self.alpha,self.timer,self.pos_changed)
+	DrawMOD(self.title,self._list,self._pos,self.x,self.y,self.alpha,self.timer,self.pos_changed)
 end
 
 function DrawMOD(title,text,pos,x,y,alpha,timer,shake,align)
@@ -540,11 +540,11 @@ function start_game()
 		stage.QuitGame()
 		return
 	end
-	SetSEVolume(setting.sevolume)
-	SetBGMVolume(setting.bgmvolume)
+	SetSEVolume(setting.sevolume/100)
+	SetBGMVolume(setting.bgmvolume/100)
 	ResetScreen()--Lscreen
-	ResetUI()
 	SetResourceStatus'global'
+	ResetUI()
 	Include("root.lua")
 	SetResourceStatus'stage'
 	InitAllClass()--Lobject

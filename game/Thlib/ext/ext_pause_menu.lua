@@ -1,65 +1,39 @@
---======================================
---pause menu
---======================================
+---=====================================
+---pause menu
+---=====================================
 
 ----------------------------------------
---暂停菜单
+---暂停菜单
 
-ext.pausemenu={}
+---@class ext.pausemenu @暂停菜单对象
+ext.pausemenu=plus.Class()
 
-ext.pausemenu.mask_color=Color(0,255,255,255)
-ext.pausemenu.mask_alph={0,0,0}
-ext.pausemenu.mask_x={0,0,0}
-ext.pausemenu.text={
-	{'Return to Game','Return to Title','Give up and Retry'},
-	{'Return to Game','Return to Title','Replay Again'},
-}
-
-function ext.pausemenu.New()
-	local pm={
-		frame=ext.pausemenu.frame,
-		render=ext.pausemenu.render,
-		kill=false,
-	}
-	ext.pausemenu.init(pm)
-	return pm
-end
-
-function ext.pausemenu.init(self)
+function ext.pausemenu:init()
+	self.kill=true
+	
 	self.pos=1
 	self.pos2=2
 	self.ok=false
 	self.choose=false
-	self.pos_pre=1
+	self.lock=true
+	
 	self.timer=0
 	self.t=30
+	
 	self.eff=0
-	self.pos_changed=0
-	self.lock=false
-	task.New(self,function()
-		local pm=ext.pausemenu
-		self.lock=true
-		pm.mask_alph={0,0,0}
-		pm.mask_x={0,0,0}
-		for i=1,50 do
-			pm.mask_color=Color(i*4.1,0,0,0)
-			pm.mask_alph={
-				min(i*8,239),
-				max(min((i-10)*8,239),0),
-				max(min((i-20)*8,239),0),
-			}
-			pm.mask_x={
-				min(-210+i,-180),
-				min(-220+i,-180),
-				min(-230+i,-180),
-			}
-			task.Wait(1)
-		end
-		self.lock=false
-	end)
+	self.mask_color=Color(0,255,255,255)
+	self.mask_alph={0,0,0}
+	self.mask_x={0,0,0}
+	
+	self.text={
+		{'Return to Game','Return to Title','Give up and Retry'},
+		{'Return to Game','Return to Title','Replay Again'},
+	}
 end
 
-function ext.pausemenu.frame(self)
+function ext.pausemenu:oldframe()
+	if self.kill then return "killed" end
+	
 	--根据是否是replay状态选择暂停菜单文字
 	local m
 	if ext.replay.IsReplay() then
@@ -72,7 +46,7 @@ function ext.pausemenu.frame(self)
 	if lstg.tmpvar.pause_menu_text then
 		pause_menu_text=lstg.tmpvar.pause_menu_text
 	else
-		pause_menu_text=ext.pausemenu.text[m]
+		pause_menu_text=self.text[m]
 	end
 	--检测按键切换槽位
 	if GetLastKey()==setting.keys.up and self.t<=0 then
@@ -93,7 +67,7 @@ function ext.pausemenu.frame(self)
 	end
 	self.pos=(self.pos-1)%(#pause_menu_text)+1
 	self.pos2=(self.pos2-1)%(2)+1
-	--
+	--last op
 	self.timer=self.timer+1
 	if self.t>0 then self.t=self.t-1 end
 	if self.choose then
@@ -167,45 +141,135 @@ function ext.pausemenu.frame(self)
 			PlaySound('cancel00',0.3)
 		end
 		if not lstg.tmpvar.death and (self.pos2==1 or self.pos==1) then
-			task.New(self,function()
-				local pm=ext.pausemenu
-				self.lock=true
-				for i=30,1,-1 do
-					pm.mask_color=Color(i*7,0,0,0)
-					for j=1,3 do
-						pm.mask_alph[j]=i*8
-					end
-					task.Wait(1)
-				end
-				task.New(stage.current_stage,function()
-					task.Wait(1)
-					local _,bgm=EnumRes('bgm')
-					for _,v in pairs(bgm) do
-						if GetMusicState(v)~='stopped' then
-							ResumeMusic(v)
-						end
-					end
-					--[=[
-					local sound,_=EnumRes('snd')
-					for _,v in pairs(sound) do
-						if GetSoundState(v)=='paused' then
-							ResumeSound(v)
-						end
-					end
-					]=]
-					--StopMusic(deathmusic)
-				end)
-				
-				--不能在这里就直接把自身清除，因为还在执行自身task
-				self.kill=true
-			end)
+			self:FlyOut()
 		end
 	end
 end
 
-function ext.pausemenu.render(self)
+function ext.pausemenu:frame()
+	if self.kill then return "killed" end
+	
+	--如果有可用的暂停菜单文字，则优先使用已有的
+	local pause_menu_text
+	if lstg.tmpvar.pause_menu_text then
+		pause_menu_text=lstg.tmpvar.pause_menu_text
+	else
+		--根据是否是replay状态选择暂停菜单文字
+		if ext.replay.IsReplay() then
+			pause_menu_text=self.text[2]
+		else
+			pause_menu_text=self.text[1]
+		end
+	end
+	--执行自身task
+	task.Do(self)
+	--执行选项操作
+	if (not self.lock) and self.t<1 then
+		local lastkey=GetLastKey()
+		--关闭暂停菜单
+		if lastkey==setting.keysys.menu then
+			if not ext.rep_over then
+				self.t=60
+				PlaySound('cancel00',0.3)
+				self.choose=false
+				self:FlyOut()
+			end
+		end
+		--直接重开
+		if lastkey==setting.keysys.retry then
+			self.t=60
+			PlaySound('ok00',0.3)
+			self.choose=false
+			if ext.replay.IsReplay() then
+				ext.pause_menu_order='Replay Again'
+			else
+				ext.pause_menu_order='Give up and Retry'
+			end
+			self:FlyOut()
+		end
+		--槽位切换
+		do
+			if lastkey==setting.keys.up then
+				self.t=4
+				PlaySound('select00',0.3)
+				if not self.choose then
+					self.pos=self.pos-1
+				else
+					self.pos2=self.pos2-1
+				end
+			elseif lastkey==setting.keys.down then
+				self.t=4
+				PlaySound('select00',0.3)
+				if not self.choose then
+					self.pos=self.pos+1
+				else
+					self.pos2=self.pos2+1
+				end
+			end
+			self.pos=(self.pos-1)%(#pause_menu_text)+1
+			self.pos2=(self.pos2-1)%(2)+1
+		end
+		--取消操作
+		if lastkey==setting.keys.spell then
+			if self.choose then
+				self.t=15
+				PlaySound('cancel00',0.3)
+				self.choose=false
+			else
+				if not ext.rep_over then
+					self.t=60
+					PlaySound('cancel00',0.3)
+					self:FlyOut()
+				end
+			end
+		end
+		--按键操作
+		if lastkey==setting.keys.shoot then
+			if self.choose then
+				if self.pos2==1 then
+					--确认选项，推送命令，暂停菜单关闭
+					self.t=60
+					PlaySound('ok00',0.3)
+					ext.PushPauseMenuOrder(pause_menu_text[self.pos])
+					self.choose=false
+					self:FlyOut()
+				else
+					--取消选项
+					self.t=15
+					PlaySound('cancel00',0.3)
+					self.choose=false
+				end
+			else
+				--未选中状态，进入二级菜单
+				self.t=15
+				PlaySound('ok00',0.3)
+				if self.pos==1 then
+					--对第一个选项特化处理
+					ext.PushPauseMenuOrder(pause_menu_text[self.pos])
+					self:FlyOut()
+				else
+					self.choose=true
+				end
+			end
+		end
+	end
+	--last op
+	self.timer=self.timer+1
+	if self.t>0 then
+		self.t=self.t-1
+	end
+	if self.choose then
+		self.eff=min(self.eff+1,15)
+	else
+		self.eff=max(self.eff-1,0)
+	end
+end
+
+function ext.pausemenu:render()
+	if self.kill then return "killed" end
+	
 	--准备一些变量
-	local pm=ext.pausemenu
+	local pm=self--ext.pausemenu
 	local dx=208
 	local dy=240
 	local m
@@ -304,8 +368,130 @@ function ext.pausemenu.render(self)
 	SetViewMode'world'
 end
 
+function ext.pausemenu:FlyIn()
+	--清除一些flag
+	ext.pop_pause_menu = nil
+	
+	self.kill=false--标记为开启状态
+	
+	self.pos=1
+	self.pos2=2
+	self.ok=false
+	self.choose=false
+	self.lock=true
+	
+	self.timer=0
+	self.t=30
+	
+	self.eff=0
+	self.mask_color=Color(0,255,255,255)
+	self.mask_alph={0,0,0}
+	self.mask_x={0,0,0}
+	
+	task.New(self,function()
+		self:PauseSound()
+		PlaySound('pause', 0.5)
+		
+		for i=1,50 do
+			self.mask_color=Color(i*4.1,0,0,0)
+			self.mask_alph={
+				min(i*8,239),
+				max(min((i-10)*8,239),0),
+				max(min((i-20)*8,239),0),
+			}
+			self.mask_x={
+				min(-210+i,-180),
+				min(-220+i,-180),
+				min(-230+i,-180),
+			}
+			task.Wait(1)
+		end
+		self.lock=false
+	end)
+end
+
+function ext.pausemenu:FlyOut()
+	self.lock=true
+	
+	--应该是针对疮痍曲的淡出……
+	if not(ext.sc_pr) then
+		task.New(self,function()
+			local _,bgm=EnumRes('bgm')
+			for i=1,30 do
+				for _,v in pairs(bgm) do
+					if GetMusicState(v)=='playing' then
+						SetBGMVolume(v,1-i/30)
+					end
+				end
+				task.Wait(1)
+			end
+		end)
+	end
+	task.New(self,function()
+		for i=30,1,-1 do
+			self.mask_color=Color(i*7,0,0,0)
+			for j=1,3 do
+				self.mask_alph[j]=i*8
+			end
+			task.Wait(1)
+		end
+		task.New(stage.current_stage,function()
+			task.Wait(1)
+			self:ResumeSound()
+		end)
+		
+		self.kill=true--标记为关闭状态
+		
+		--清除一些flag
+		lstg.tmpvar.death = false
+		ext.rep_over=false
+	end)
+end
+
+function ext.pausemenu:PauseSound()
+	if not(ext.sc_pr) then
+		local _, bgm = EnumRes('bgm')
+		for _,v in pairs(bgm) do
+			if GetMusicState(v) ~= 'stopped' and v ~= 'deathmusic' then
+				PauseMusic(v)
+			end
+		end
+	end
+	--[=[
+	local sound, _ = EnumRes('snd')
+	for _,v in pairs(sound) do
+		if GetSoundState(v)~='stopped' and v ~= 'pause' then
+			PauseSound(v)
+		end
+	end
+	]=]
+end
+
+function ext.pausemenu:ResumeSound()
+	local _,bgm=EnumRes('bgm')
+	for _,v in pairs(bgm) do
+		if GetMusicState(v)~='stopped' then
+			ResumeMusic(v)
+		end
+	end
+	--[=[
+	local sound,_=EnumRes('snd')
+	for _,v in pairs(sound) do
+		if GetSoundState(v)=='paused' then
+			ResumeSound(v)
+		end
+	end
+	]=]
+	--StopMusic(deathmusic)
+end
+
+function ext.pausemenu:IsKilled()
+	local flag=self.kill
+	return flag
+end
+
 ----------------------------------------
---暂停菜单资源
+---暂停菜单资源
 
 local deathmusic='deathmusic'--疮痍曲
 

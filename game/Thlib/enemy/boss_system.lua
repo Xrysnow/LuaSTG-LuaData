@@ -409,9 +409,9 @@ function BossSystem:CastCard(card)
     self:MakeSCHist(player, diff, name)
     b.ui.sc_hist = sc_hist[player][diff][name]
     if name ~= '' then
-        --b.ui.sc_name = name
-        last = New(boss.sc_name_obj, b, name)
-        _connect(b, last, 0, true)
+        b.ui.sc_name = name
+        --last = New(boss.sc_name_obj, b, name) --TODO：SB OLC
+        --_connect(b, last, 0, true)
     end
 end
 

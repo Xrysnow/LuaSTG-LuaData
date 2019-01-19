@@ -320,7 +320,7 @@ function Add_bentlaser_thunder_texture(id,tex)
 end
 
 --by ETC
-laser_bent_death_ef=Class(Object)
+laser_bent_death_ef=Class(object)
 function laser_bent_death_ef:init(index,data,sample,blend,a,r,g,b)
 	self.data=data
 	self.sample=sample

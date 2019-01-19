@@ -1,6 +1,8 @@
---======================================
---luastg object
---======================================
+---=====================================
+---luastg object
+---=====================================
+
+local LOG_MODULE_NAME="[lstg][object]"
 
 ----------------------------------------
 --碰撞组(底层所需)
@@ -26,7 +28,7 @@ LAYER_ENEMY_BULLET_EF=-100
 LAYER_TOP=0
 
 ----------------------------------------
---class
+---class
 
 all_class={}
 class_name={}
@@ -42,9 +44,25 @@ object={0,0,0,0,0,0;
 	kill=function()end
 }
 
---define new class
+---define new class
+---@param base object
+---@param define object
 function Class(base, define)
-	base=base or object
+	if not base then
+		--[!!!处理一个特殊的歧义!!!]
+		--由于lua无法识别传入nil参数和不传入参数，所以会出现歧义，进而可能会引发最隐匿的bug
+		--如果指定的基类base不存在(nil)，这个函数等效于不传入参数base，那么这个函数就会按照XXX=Class(object)处理
+		local dinfo = debug.getinfo(2)
+		local ret=""
+		ret=ret.."An empty base Class is encountered when defining a Class, which is equivalent to XXX =Class(object).\n"
+		ret=ret.."Be careful to check if this is the result you want.\n"
+		ret=ret.."----file: ["..dinfo.source.."]\n----line: "..dinfo.currentline
+		lstg.Log(3,LOG_MODULE_NAME,ret)
+		ret=ret.."\nIgnore this warning?"
+		lstg.MsgBoxLog(ret)
+		--忽视警告，则使用默认基类object类
+		base=object
+	end
 	if (type(base)~='table') or not base.is_class then
 		error('Invalid base class or base class does not exist.')
 	end
@@ -57,7 +75,7 @@ function Class(base, define)
 	result.colli=base.colli
 	result.kill=base.kill
 	result.base=base
-	if define then
+	if define and type(define)=="table" then
 		for k,v in pairs(define) do
 			result[k] = v
 		end
@@ -66,7 +84,7 @@ function Class(base, define)
 	return result
 end
 
---对所有class的回调函数进行整理，给底层调用
+---对所有class的回调函数进行整理，给底层调用
 function InitAllClass()
 	for _,v in pairs(all_class) do
 		v[1]=v.init
@@ -79,7 +97,7 @@ function InitAllClass()
 end
 
 ----------------------------------------
---单位管理
+---单位管理
 
 function RawDel(o)
 	if o then

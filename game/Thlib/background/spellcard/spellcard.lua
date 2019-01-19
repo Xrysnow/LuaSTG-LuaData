@@ -25,9 +25,9 @@ end
 function _spellcard_background:render()
 	SetViewMode'world'
 	if self.alpha>0 then
-		local showboss = IsValid(_boss) and lstg.tmpvar.bg and lstg.tmpvar.bg.hide==true
+		local showboss = lstg.tmpvar.bg and lstg.tmpvar.bg.hide==true
 		if showboss then
-			PostEffectCapture()
+			background.WarpEffectCapture()
 		end
 		for i=#(self.layers),1,-1 do
 			local l=self.layers[i]
@@ -46,22 +46,7 @@ function _spellcard_background:render()
 			if l.render then l.render(l) end
 		end
 		if showboss then
-		local x,y = WorldToScreen(_boss.x,_boss.y)
-		local x1 = x * screen.scale
-		local y1 = (screen.height - y) * screen.scale
-		local fxa = _boss.fxa or 125
-		local fxr = _boss.fxr or 163
-		local fxg = _boss.fxg or 73
-		local fxb = _boss.fxb or 164
-		PostEffectApply("boss_distortion", "mul+alpha", {
-			centerX = x1,
-			centerY = y1,
-			size = _boss.aura_alpha*self.fxsize*lstg.scale_3d,
-			color = Color(fxa*self.fxsize/200,fxr,fxg,fxb),
-			colorsize = _boss.aura_alpha*200*lstg.scale_3d,
-			arg=1500*_boss.aura_alpha/128*lstg.scale_3d,
-			timer = self.timer
-        })
+			background.WarpEffectApply()
 		end
 	end
 end
