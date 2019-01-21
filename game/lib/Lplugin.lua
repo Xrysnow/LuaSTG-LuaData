@@ -10,11 +10,11 @@ local LOG_MODULE_NAME="[lstg][plugin]"
 ---@class plugin @插件包辅助
 lstg.plugin={}
 
-local PLUGIN_PATH="Library\\plugins\\"
-local PLUGIN_PATH_1="Library\\"
-local PLUGIN_PATH_2="Library\\plugins\\"
-local ENTRY_POINT_SCRIPT_PATH=""
-local ENTRY_POINT_SCRIPT="__init__.lua"
+local PLUGIN_PATH="Library\\plugins\\"    --插件路径
+local PLUGIN_PATH_1="Library\\"           --插件路径一级路径
+local PLUGIN_PATH_2="Library\\plugins\\"  --插件路径二级路径
+local ENTRY_POINT_SCRIPT_PATH=""          --入口点文件路径
+local ENTRY_POINT_SCRIPT="__init__.lua"   --入口点文件
 
 ---罗列插件目录下所有的插件
 ---该方法没有对插件包合法性进行检测，即使插件中没有入口点脚本也会罗列出来

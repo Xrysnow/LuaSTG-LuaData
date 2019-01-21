@@ -260,13 +260,17 @@ if updatelib then
 	lfs.chdir('..')
 end
 
-for _,v in ipairs({"data","background","se","music","font","player"}) do
+for _,v in ipairs({"data","background","se","music","font"}) do
 	local packpath="Library\\"..v..".zip"
 	if not (lfs.attributes(packpath)==nil) then
 		LoadPack(packpath)
 	end
 end
 
+if setting.mod~='launcher' then
+	LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
+end
+--[=[
 if setting.mod~='launcher' then
 	if not(lfs.attributes('mod\\'..setting.mod..'.zip')==nil) then
 		LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
@@ -285,6 +289,7 @@ else
 		--使用游戏根目录里面的启动器
 	end
 end
+--]=]
 
 SetSplash(false)
 SetTitle(setting.mod)
