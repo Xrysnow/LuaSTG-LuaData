@@ -11,6 +11,8 @@ local LOG_MODULE_NAME="[lstg][plugin]"
 lstg.plugin={}
 
 local PLUGIN_PATH="Library\\plugins\\"
+local PLUGIN_PATH_1="Library\\"
+local PLUGIN_PATH_2="Library\\plugins\\"
 local ENTRY_POINT_SCRIPT_PATH=""
 local ENTRY_POINT_SCRIPT="__init__.lua"
 
@@ -127,9 +129,20 @@ local function format_json(str)
 	return ret
 end
 
+---检查目录是否存在，不存在则创建
+local function check_directory()
+	if not plus.DirectoryExists(PLUGIN_PATH_1) then
+		plus.CreateDirectory(PLUGIN_PATH_1)
+	end
+	if not plus.DirectoryExists(PLUGIN_PATH_2) then
+		plus.CreateDirectory(PLUGIN_PATH_2)
+	end
+end
+
 ---加载配置文件
 ---@return table @{{PluginName,PluginPath,Enable}, ... }
 function lstg.plugin.LoadConfig()
+	check_directory()
 	local f,msg
 	f,msg=io.open(PLUGIN_PATH..CONFIG_FILE,"r")
 	if f==nil then
@@ -144,6 +157,7 @@ end
 ---保存配置文件
 ---@param cfg table @{{PluginName,PluginPath,Enable}, ... }
 function lstg.plugin.SaveConfig(cfg)
+	check_directory()
 	local f,msg
 	f,msg=io.open(PLUGIN_PATH..CONFIG_FILE,"w")
 	if f==nil then
