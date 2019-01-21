@@ -1,15 +1,19 @@
---======================================
---luastg task
---======================================
+---=====================================
+---luastg task
+---=====================================
 
 ----------------------------------------
---基本函数
+---基本函数
 
+---@class task
 task={}
 task.stack={}
 task.co={}
+
 function task:New(f)
-	if not self.task then self.task={} end
+	if not self.task then
+		self.task={}
+	end
 	local rt=coroutine.create(f)
 	table.insert(self.task,rt)
 	return rt
@@ -42,18 +46,19 @@ function task:Clear(keepself)
 		end	
 		self.task=nil 
 		if flag then
-			self.task={}
-			self.task[1]=co
+			self.task={co}
 		end
 	else
-	self.task=nil 
+		self.task=nil
 	end
 end
 
 function task.Wait(t)
 	t=t or 1
 	t=max(1,int(t))
-	for i=1,t do coroutine.yield() end
+	for i=1,t do
+		coroutine.yield()
+	end
 end
 
 function task.Until(t)
@@ -64,12 +69,16 @@ function task.Until(t)
 end
 
 function task.GetSelf() 
-local c=task.stack[#task.stack] 
-if c.taskself then return c.taskself else return c end
+	local c=task.stack[#task.stack]
+	if c.taskself then
+		return c.taskself
+	else
+		return c
+	end
 end
 
 ----------------------------------------
---拓展功能
+---拓展功能
 
 MOVE_NORMAL=0
 MOVE_ACCEL=1

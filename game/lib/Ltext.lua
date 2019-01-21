@@ -9,9 +9,11 @@ ENUM_TTF_FMT = {
 	left=0x00000000,
 	center=0x00000001,
 	right=0x00000002,
+	
 	top=0x00000000,
 	vcenter=0x00000004,
 	bottom=0x00000008,
+	
 	wordbreak=0x00000010,
 	--singleline=0x00000020,
 	--expantextabs=0x00000040,
