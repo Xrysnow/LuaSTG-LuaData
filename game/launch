@@ -267,10 +267,12 @@ for _,v in ipairs({"data","background","se","music","font"}) do
 	end
 end
 
+--[=[
 if setting.mod~='launcher' then
 	LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
 end
---[=[
+--]=]
+---[=[
 if setting.mod~='launcher' then
 	if not(lfs.attributes('mod\\'..setting.mod..'.zip')==nil) then
 		LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
