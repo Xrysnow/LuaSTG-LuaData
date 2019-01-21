@@ -576,6 +576,7 @@ function AddPlayerToPlayerList(displayname,classname,replayname,pos,_replace)
 	end
 end
 
+---加载自机包
 function LoadPlayerPacks()
 	player_list={}--先清空一次
 	
