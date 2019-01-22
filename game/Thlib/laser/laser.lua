@@ -1,7 +1,7 @@
 laser_texture_num = 1
 laser_data = {}
-function LoadLaserTexture(text,l1,l2,l3)
 
+function LoadLaserTexture(text,l1,l2,l3)
 	local n = laser_texture_num
 	local texture = 'laser'..n
 	LoadTexture(texture,'THlib\\laser\\'..text..'.png')
@@ -58,32 +58,31 @@ function laser:frame()
 		self.alpha=self.alpha+self.da
 	end
 	if self.alpha>0.999 and self.colli then
-	for _,player in pairs(Players(self)) do
-		local x=player.x-self.x
-		local y=player.y-self.y
-		local rot=self.rot
-		local dist=2
-		x,y=x*cos(rot)+y*sin(rot),y*cos(rot)-x*sin(rot)
-		y=abs(y)
-		if x>0 then
-			if x<self.l1 then
-				if y<x/self.l1*self.w/dist then player.class.colli(player,self) end
-			elseif x<self.l1+self.l2 then
-				if y<self.w/dist then player.class.colli(player,self) end
-			elseif x<self.l1+self.l2+self.l3 then
-				if y<(self.l1+self.l2+self.l3-x)/self.l3*self.w/dist then player.class.colli(player,self) end
-			end
-			if self.timer%4==0 then
+		for _,player in pairs(Players(self)) do
+			local x=player.x-self.x
+			local y=player.y-self.y
+			local rot=self.rot
+			local dist=2
+			x,y=x*cos(rot)+y*sin(rot),y*cos(rot)-x*sin(rot)
+			y=abs(y)
+			if x>0 then
+				local flag=false
 				if x<self.l1 then
-					if y<x/self.l1*self.w/dist+16 then item.PlayerGraze() player.grazer.grazed=true end
+					if y<x/self.l1*self.w/dist then player.class.colli(player,self) end
+					if y<x/self.l1*self.w/dist+16 then flag=true end
 				elseif x<self.l1+self.l2 then
-					if y<self.w/dist+16 then item.PlayerGraze() player.grazer.grazed=true end
+					if y<self.w/dist then player.class.colli(player,self) end
+					if y<self.w/dist+16 then flag=true end
 				elseif x<self.l1+self.l2+self.l3 then
-					if y<(self.l1+self.l2+self.l3-x)/self.l3*self.w/dist+16 then item.PlayerGraze() player.grazer.grazed=true end
+					if y<(self.l1+self.l2+self.l3-x)/self.l3*self.w/dist then player.class.colli(player,self) end
+					if y<(self.l1+self.l2+self.l3-x)/self.l3*self.w/dist+16 then flag=true end
+				end
+				if self.timer%4==0 and flag then
+					item.PlayerGraze()
+					player.grazer.grazed=true
 				end
 			end
 		end
-	end
 	end
 end
 
@@ -114,6 +113,39 @@ function laser:render()
 	end
 end
 
+function laser:kill()--老的实现
+	PreserveObject(self)
+	local w=lstg.world
+	if self.class~=laser_death_ef then
+		local cx, cy = cos(self.rot), sin(self.rot)
+		local x,y=0,0
+		local length=((32768-GetnObj())/2)*12
+		length=min(length,self.l1+self.l2+self.l3)
+		for l=0,length,12 do
+			x,y=self.x+l*cx,self.y+l*cy
+			if (x<=w.r and x>=w.l) and (y<=w.t and y>=w.b) then
+				New(item_faith_minor,x,y)
+				if self.index and l%2==0 then
+					New(BulletBreak,x,y,self.index)
+				end
+			end
+		end
+		self.class=laser_death_ef
+		self.group=GROUP_GHOST
+		local alpha=self.alpha
+		local d=self.w
+		task.Clear(self)
+		task.New(self,function()
+			for i=1,30 do
+				self.alpha=self.alpha-alpha/30
+				self.w=self.w-d/30
+				task.Wait()
+			end
+			Del(self)
+		end)
+	end
+end
+
 function laser:del()
 	PreserveObject(self)
 	if self.class~=laser_death_ef then
@@ -133,23 +165,91 @@ function laser:del()
 	end
 end
 
-function laser:kill()
+local function InScope(var, minvar, maxvar)
+	return (var >= minvar) and (var <= maxvar)
+end
+
+local function GetIntersction(x1, y1, rot1, x2, y2, rot2)
+	local t = (x2 - x1) / cos(rot1)
+	local y = y1 + t * sin(rot1)
+	return x2, y
+end
+
+function laser:newkill()
 	PreserveObject(self)
-	if self.class~=laser_death_ef then
-		local cx, cy = cos(self.rot), sin(self.rot)
-		for l=0,self.l1+self.l2+self.l3,12 do
-			New(item_faith_minor,self.x+l*cx,self.y+l*cy)
-			if self.index and l%2==0 then New(BulletBreak,self.x+l*cx,self.y+l*cy,self.index) end
+	if self.class ~= laser_death_ef then
+		local x1, y1, x2, y2, x, y
+		local w = lstg.world
+		local x0, y0, rot = self.x, self.y, self.rot
+		local len = self.l1 + self.l2 + self.l3
+		local tx0, ty0 = x0 + len * cos(rot), y0 + len * sin(rot)
+		if x0 > tx0 then
+			x0, tx0, y0, ty0 = tx0, x0, ty0, y0
 		end
-		self.class=laser_death_ef
-		self.group=GROUP_GHOST
-		local alpha=self.alpha
-		local d=self.w
+		--
+		local bx, by = GetIntersction(x0, y0, rot, w.boundl, w.boundb, 0)
+		local lx, ly = GetIntersction(x0, y0, rot, w.boundl, w.boundb, 90)
+		local tx, ty = GetIntersction(x0, y0, rot, w.boundr, w.boundt, 180)
+		local rx, ry = GetIntersction(x0, y0, rot, w.boundr, w.boundt, 270)
+		--
+		local flag = InScope(x0, w.boundl, w.boundr)
+		flag = flag or InScope(tx0, w.boundl, w.boundr)
+		flag = flag or InScope(y0, w.boundb, w.boundt)
+		flag = flag or InScope(ty0, w.boundb, w.boundt)
+		flag = flag or InScope(bx, w.boundl, w.boundr)
+		flag = flag or InScope(tx, w.boundl, w.boundr)
+		flag = flag or InScope(ly, w.boundb, w.boundt)
+		flag = flag or InScope(ry, w.boundb, w.boundt)
+		if flag then
+			if by < ly then
+				if x0 < bx then
+					x1, y1 = bx, by
+				else
+					x1, y1 = x0, y0
+				end
+			else
+				if x0 < lx then
+					x1, y1 = lx, ly
+				else
+					x1, y1 = x0, y0
+				end
+			end
+			if ry < ty then
+				if tx0 < rx then
+					x2, y2 = tx0, ty0
+				else
+					x2, y2 = rx, ry
+				end
+			else
+				if tx0 < tx then
+					x2, y2 = tx0, ty0
+				else
+					x2, y2 = tx, ty
+				end
+			end
+			len = Dist(x1, y1, x2, y2)
+			if self.x <= x1 then
+				x, y = x1, y1
+			else
+				x, y, rot = x2, y2, rot + 180
+			end
+			local cx, cy = cos(rot), sin(rot)
+			for l = 0, len, 12 do
+				New(item_faith_minor, x + l * cx, y + l * cy)
+				if l % 2 == 0 and self.index then
+					New(BulletBreak, x + l * cx, y + l * cy, self.index)
+				end
+			end
+		end
+		self.class = laser_death_ef
+		self.group = GROUP_GHOST
+		local alpha = self.alpha
+		local d = self.w
 		task.Clear(self)
-		task.New(self,function()
-			for i=1,30 do
-				self.alpha=self.alpha-alpha/30
-				self.w=self.w-d/30
+		task.New(self, function()
+			for i = 1, 30 do
+				self.alpha = self.alpha - alpha / 30
+				self.w = self.w - d / 30
 				task.Wait()
 			end
 			Del(self)
@@ -209,6 +309,7 @@ function laser:TurnOn(t,mute)
 	self.da=(1-self.alpha)/t
 	self.dw=(self.w0-self.w)/t
 end
+
 function laser:TurnHalfOn(t)
 	t=t or 30
 	t=max(1,int(t))
@@ -216,6 +317,7 @@ function laser:TurnHalfOn(t)
 	self.da=(0.5-self.alpha)/t
 	self.dw=(0.5*self.w0-self.w)/t
 end
+
 function laser:TurnOff(t)
 	t=t or 30
 	t=max(1,int(t))
@@ -225,9 +327,11 @@ function laser:TurnOff(t)
 end
 
 laser_death_ef=Class(laser)
-function laser_death_ef:frame() task.Do(self) end
-function laser_death_ef:del() end
-function laser_death_ef:kill() end
 
+function laser_death_ef:frame() task.Do(self) end
+
+function laser_death_ef:del() end
+
+function laser_death_ef:kill() end
 
 Include("THlib\\laser\\bent laser.lua")

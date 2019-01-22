@@ -347,7 +347,11 @@ function ball_huge:init(index)
 end
 function ball_huge:frame()
 	if not self.stay then
-		self.logclass.frame(self)
+		if not(self._forbid_ref) then--by OLC，修正了defaul action死循环的问题
+			self._forbid_ref=true
+			self.logclass.frame(self)
+			self._forbid_ref=nil
+		end
 	else
 		self.x=self.x-self.vx
 		self.y=self.y-self.vy
@@ -378,7 +382,11 @@ function ball_huge_dark:init(index)
 end
 function ball_huge_dark:frame()
 	if not self.stay then
-		self.logclass.frame(self)
+		if not(self._forbid_ref) then--by OLC，修正了defaul action死循环的问题
+			self._forbid_ref=true
+			self.logclass.frame(self)
+			self._forbid_ref=nil
+		end
 	else
 		self.x=self.x-self.vx
 		self.y=self.y-self.vy
@@ -409,7 +417,11 @@ function ball_light:init(index)
 end
 function ball_light:frame()
 	if not self.stay then
-		self.logclass.frame(self)
+		if not(self._forbid_ref) then--by OLC，修正了defaul action死循环的问题
+			self._forbid_ref=true
+			self.logclass.frame(self)
+			self._forbid_ref=nil
+		end
 	else
 		self.x=self.x-self.vx
 		self.y=self.y-self.vy
@@ -440,7 +452,11 @@ function ball_light_dark:init(index)
 end
 function ball_light_dark:frame()
 	if not self.stay then
-		self.logclass.frame(self)
+		if not(self._forbid_ref) then--by OLC，修正了defaul action死循环的问题
+			self._forbid_ref=true
+			self.logclass.frame(self)
+			self._forbid_ref=nil
+		end
 	else
 		self.x=self.x-self.vx
 		self.y=self.y-self.vy

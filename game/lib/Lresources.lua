@@ -15,9 +15,13 @@ function Include(filename)
 	end
 	if not lstg.included[filename] then
 		local i,j=string.find(filename,'^.+[\\/]+')
-		if i then table.insert(lstg.current_script_path,string.sub(filename,i,j)) else table.insert(lstg.current_script_path,'') end
+		if i then
+			table.insert(lstg.current_script_path,string.sub(filename,i,j))
+		else
+			table.insert(lstg.current_script_path,'')
+		end
 		lstg.included[filename]=true
-		DoFile(filename)
+		lstg.DoFile(filename)
 		lstg.current_script_path[#lstg.current_script_path]=nil
 	end
 end

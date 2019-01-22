@@ -1,4 +1,8 @@
-Include'THlib.lua'
+---------------------------------------
+---启动器
+---------------------------------------
+
+Include'THlib\\THlib.lua'
 
 local GetLastKey=_GetLastKey
 
@@ -78,7 +82,10 @@ function setting_keys_default()
 	cur_setting.keysys.retry=default_setting.keysys.retry
 end
 
+---------------------------------------
+
 stage_init=stage.New('settings',true,true)
+
 function stage_init:init()
 	LoadTTF('menuttfs','THlib\\UI\\font\\default_ttf',40)
 	--
@@ -101,13 +108,41 @@ function stage_init:init()
 	New(mask_fader,'open')
 	--
 	menu_title=New(simple_menu,'',{
-		{'Start Game',function() menu.FlyIn(menu_mod,'right') menu.FlyOut(menu_title,'left') end},
-		{'Set User Name',function() menu.FlyIn(menu_name,'right') menu.FlyOut(menu_title,'left') end},
-		{'Key Settings 1P',function() menu.FlyIn(menu_key,'right') menu.FlyOut(menu_title,'left') menu_key.pos=1 menu_key.title='Key Settings 1P' menu_key.key=cur_setting.keys end},
-		{'Key Settings 2P',function() menu.FlyIn(menu_key,'right') menu.FlyOut(menu_title,'left') menu_key.pos=1 menu_key.title='Key Settings 2P' menu_key.key=cur_setting.keys2 end},
-		{'Other Settings',function() menu.FlyIn(menu_other,'right') menu.FlyOut(menu_title,'left') menu_other.pos=1 end},
+		{'Start Game',function()
+			menu.FlyIn(menu_mod,'right')
+			menu.FlyOut(menu_title,'left')
+		end},
+		{'Set User Name',function()
+			menu.FlyIn(menu_name,'right')
+			menu.FlyOut(menu_title,'left')
+		end},
+		{'Key Settings 1P',function()
+			menu.FlyIn(menu_key,'right')
+			menu.FlyOut(menu_title,'left')
+			menu_key.pos=1
+			menu_key.title='Key Settings 1P'
+			menu_key.key=cur_setting.keys
+		end},
+		{'Key Settings 2P',function()
+			menu.FlyIn(menu_key,'right')
+			menu.FlyOut(menu_title,'left')
+			menu_key.pos=1
+			menu_key.title='Key Settings 2P'
+			menu_key.key=cur_setting.keys2
+		end},
+		{'Other Settings',function()
+			menu.FlyIn(menu_other,'right')
+			menu.FlyOut(menu_title,'left')
+			menu_other.pos=1
+		end},
+		{'Plugin Manager',function()
+			menu.FlyIn(menu_plugin,'right')
+			menu.FlyOut(menu_title,'left')
+			_plugin_manager_menu.refresh(menu_plugin)
+			--menu_plugin.pos=1
+		end},
 		{'Exit Launcher',ExitGame},
-		{'exit',function() if menu_title.pos==5 then ExitGame() else menu_title.pos=5 end end},
+		{'exit',function() if menu_title.pos==7 then ExitGame() else menu_title.pos=7 end end},
 	})
 	--
 	menu_name=New(name_set_menu)
@@ -203,11 +238,22 @@ function stage_init:init()
 		end},
 	})
 	--
+	menu_plugin=New(_plugin_manager_menu,function(self)
+		if self.edit then
+			self.edit=false
+		else
+			_plugin_manager_menu.save(self)
+			menu.FlyIn(menu_title,'left')
+			menu.FlyOut(menu_plugin,'right')
+		end
+	end)
+	--
 	menu.FlyIn(menu_title,'right')
 end
-function stage_init:render()
-	ui.DrawMenuBG()
-end
+
+function stage_init:render() ui.DrawMenuBG() end
+
+---------------------------------------
 
 name_set_menu=Class(object)
 
@@ -288,6 +334,8 @@ function name_set_menu:render()
 	RenderText('menu',self.text,self.x,self.y-5.5*ui.menu.line_height,ui.menu.font_size,'centerpoint')
 end
 
+---------------------------------------
+
 local key_func={'up','down','left','right','slow','shoot','spell','special','repfast','repslow','menu','snapshot'}
 
 key_setting_menu=Class(simple_menu)
@@ -350,6 +398,8 @@ function key_setting_menu:render()
 	table.insert(key_name,'')
 	ui.DrawMenu('',key_name,self.pos,self.x+128,self.y-ui.menu.line_height,self.alpha,self.timer,self.pos_changed,'right')
 end
+
+---------------------------------------
 
 other_setting_menu=Class(simple_menu)
 
@@ -436,6 +486,8 @@ function other_setting_menu:render()
 	setting_text[7]=''
 	ui.DrawMenu('',setting_text,self.pos,self.x+128,self.y-ui.menu.line_height,self.alpha,self.timer,self.pos_changed,'right')
 end
+
+---------------------------------------
 
 simple_menu_mod=Class(object)
 
@@ -524,6 +576,225 @@ function DrawMODTTF(title,text,pos,x,y,alpha,timer,shake,align)
 	end
 end
 
+---------------------------------------
+
+_plugin_manager_menu=Class(object)
+
+function _plugin_manager_menu:init(exit_func)
+	self.layer=LAYER_TOP
+	self.group=GROUP_GHOST
+	self.alpha=1
+	self.x=screen.width*0.5-screen.width
+	self.y=screen.height*0.5
+	self.bound=false
+	self.locked=true
+	self.title="Plugin Manager"
+	self.pos=1
+	self.pos_pre=1
+	self.pos_changed=0
+	self.edit=false
+	
+	self._list,self._pos={},0
+	
+	self.exit_func=exit_func
+	
+	self.plugins={}
+	_plugin_manager_menu.refresh(self)
+end
+
+function _plugin_manager_menu:frame()
+	task.Do(self)
+	if self.locked then return end
+	
+	_plugin_manager_menu.sort(self)
+	--op
+	if KeyPress("slow") then
+		self.edit=true
+		--pos
+		--查找启用的插件数量
+		local enableN=0
+		for i,v in ipairs(self.plugins) do
+			if v[3] then
+				enableN=i
+			else
+				break
+			end
+		end
+		if enableN>1 then--只对一个进行排序是没有用的
+			--判断pos位置，防止越界
+			if GetLastKey()==setting.keys.up and self.pos>1 then
+				local tmp=self.plugins[self.pos]
+				self.plugins[self.pos]=self.plugins[self.pos-1]
+				self.plugins[self.pos-1]=tmp
+				self.pos=self.pos-1
+				PlaySound('select00',0.3)
+			elseif GetLastKey()==setting.keys.down and self.pos<enableN then--只对启用的插件进行排序
+				local tmp=self.plugins[self.pos]
+				self.plugins[self.pos]=self.plugins[self.pos+1]
+				self.plugins[self.pos+1]=tmp
+				self.pos=self.pos+1
+				PlaySound('select00',0.3)
+			end
+		end
+	else
+		self.edit=false
+		--pos
+		if GetLastKey()==setting.keys.up then
+			self.pos=self.pos-1
+			PlaySound('select00',0.3)
+		elseif GetLastKey()==setting.keys.down then
+			self.pos=self.pos+1
+			PlaySound('select00',0.3)
+		end
+		self.pos=(self.pos-1+#(self.plugins))%(#(self.plugins))+1
+		--op
+		if KeyIsPressed'shoot' then
+			if not(self.plugins[self.pos][3]) then
+				--从启用到禁用，插件跳转到启用队列，pos前移
+				for i,v in ipairs(self.plugins) do
+					--寻找禁用队列中队首的pos
+					if not(v[3]) then
+						self.plugins[self.pos][3]=not(self.plugins[self.pos][3])
+						self.pos=i
+						break
+					end
+				end
+			else
+				--从启用到禁用，插件跳转到禁用队列，pos后移
+				for i=#self.plugins,1,-1 do
+					--寻找启用队列中队尾的pos
+					if self.plugins[i][3] then
+						self.plugins[self.pos][3]=not(self.plugins[self.pos][3])
+						self.pos=i
+						break
+					end
+				end
+			end
+			PlaySound('ok00',0.3)
+		elseif KeyIsPressed'spell' and self.exit_func then
+			self.exit_func(self)
+			PlaySound('cancel00',0.3)
+		end
+	end
+	--after op
+	if self.pos_changed>0 then self.pos_changed=self.pos_changed-1 end
+	if self.pos_pre~=self.pos then self.pos_changed=ui.menu.shake_time end
+	self.pos_pre=self.pos
+	self._list,self._pos=sp.GetListSection(self.plugins, 18, self.pos, 10)
+end
+
+function _plugin_manager_menu:render()
+	_plugin_manager_menu.DrawPlugins(self.title,self._list,self._pos,self.x,self.y,self.alpha,self.timer,self.pos_changed,self.edit)
+end
+
+function _plugin_manager_menu.DrawPlugins(title,text,pos,x,y,alpha,timer,shake,edit)
+	align=align or 'center'
+	local yos
+	local ii=0
+	if pos>19 then ii=pos-19 else ii=0 end
+	if title=='' then yos=(#text+1)*ui.menu.sc_pr_line_height*0.5 else
+		yos=min((#text-1)*ui.menu.sc_pr_line_height*0.5,198)
+		SetFontState('menu','',Color(alpha*255,unpack(ui.menu.title_color)))
+		RenderText('menu',title,x,y+yos+ui.menu.line_height,ui.menu.font_size,align,'vcenter')
+	end
+	for i=1,#text do
+		local posnfmt=string.format("%02d.",i)
+		if i==pos then
+			local color={}
+			local k=cos(timer*ui.menu.blink_speed)^2
+			for j=1,3 do color[j]=ui.menu.focused_color1[j]*k+ui.menu.focused_color2[j]*(1-k) end
+			local xos=ui.menu.shake_range*sin(ui.menu.shake_speed*shake)
+			if not edit then
+				SetFontState('menu','',Color(alpha*255,unpack(color)))
+			else
+				SetFontState('menu','',Color(alpha*255,0,255,255))
+			end
+			local shoutext=text[i][1]
+			if #shoutext>18 then
+				--shoutext=string.sub(shoutext,1,16).."..."
+			end
+			RenderText('menu',
+				posnfmt..shoutext,
+				x+xos-(screen.width*0.5)+16,
+				y-min(i,19)*ui.menu.sc_pr_line_height+yos,
+				ui.menu.font_size,'left','vcenter'
+			)
+			if text[i][3] then
+				RenderText('menu',
+					"Enable",
+					x+xos+(screen.width*0.5)-16,
+					y-min(i,19)*ui.menu.sc_pr_line_height+yos,
+					ui.menu.font_size,'right','vcenter'
+				)
+			else
+				RenderText('menu',
+					"Disable",
+					x+xos+(screen.width*0.5)-16,
+					y-min(i,19)*ui.menu.sc_pr_line_height+yos,
+					ui.menu.font_size,'right','vcenter'
+				)
+			end
+		elseif i<20 and i~=pos then
+			--state
+			local state="Unkown"
+			if text[min(i+ii,#text)][3] then
+				state="Enable"
+				SetFontState('menu','',Color(alpha*255,128,128,128))
+			else
+				state="Disable"
+				SetFontState('menu','',Color(alpha*255,80,80,80))
+			end
+			RenderText('menu',
+				state,
+				x+(screen.width*0.5)-16,
+				y-i*ui.menu.sc_pr_line_height+yos,
+				ui.menu.font_size,'right','vcenter'
+			)
+			--plugin name
+			--SetFontState('menu','',Color(alpha*255,128,128,128))
+			local shoutext=text[min(i+ii,#text)][1]
+			if #shoutext>18 then
+				--shoutext=string.sub(shoutext,1,16).."..."
+			end
+			RenderText('menu',
+				posnfmt..shoutext,
+				x-(screen.width*0.5)+16,
+				y-i*ui.menu.sc_pr_line_height+yos,
+				ui.menu.font_size,'left','vcenter'
+			)
+		end
+	end
+end
+
+--禁用的排在后面
+function _plugin_manager_menu:sort()
+	local ret={}
+	for _,v in ipairs(self.plugins) do
+		if v[3] then
+			table.insert(ret,v)
+		end
+	end
+	for _,v in ipairs(self.plugins) do
+		if not(v[3]) then
+			table.insert(ret,v)
+		end
+	end
+	self.plugins=ret
+end
+
+--每次菜单飞入时刷新一次
+function _plugin_manager_menu:refresh()
+	self.plugins=lstg.plugin.LoadConfig()
+	self.plugins=lstg.plugin.FreshConfig(self.plugins)
+	lstg.plugin.SaveConfig(self.plugins)
+end
+
+--每次菜单飞出时保存一次
+function _plugin_manager_menu:save()
+	lstg.plugin.SaveConfig(self.plugins)
+end
+
+---------------------------------------
 
 function start_game()
 	loadConfigure()
