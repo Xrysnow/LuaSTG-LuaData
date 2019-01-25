@@ -13,12 +13,6 @@ local extpath="Thlib\\ext\\"
 DoFile(extpath.."ext_pause_menu.lua")--暂停菜单和暂停菜单资源
 DoFile(extpath.."ext_replay.lua")--CHU爷爷的replay系统以及切关函数重载
 DoFile(extpath.."ext_stage_group.lua")--关卡组
---判定检测插件文件接口
-if FileExist('CollisionChecker.dat') then
-	LoadPack('CollisionChecker.dat')
-	Include'ColliCheck.lua'
-	Collision_Checker.init()
-end
 
 ext.replayTicker=0--控制录像播放速度时有用
 ext.slowTicker=0--控制时缓的变量
