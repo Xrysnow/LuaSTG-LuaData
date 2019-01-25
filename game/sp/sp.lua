@@ -1,4 +1,6 @@
-local f,msg=io.open('sp_log.txt','w')
+local splogfile="sp_log.txt"
+
+local f,msg=io.open(splogfile,'w')
 if not(msg) then f:close() end
 
 sp={}
@@ -7,7 +9,7 @@ function sp.Print(...)
 	local list,str={...},''
 	for i=1,#list do str=str..list[i] end
 	Print(str)
-	local f,msg=io.open('sp_log.txt','a')
+	local f,msg=io.open(splogfile,'a')
 	if not(msg) then
 		f:setvbuf('line')
 		f:write(string.format("%s\n",str))
