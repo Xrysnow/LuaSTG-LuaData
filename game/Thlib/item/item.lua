@@ -42,7 +42,7 @@ function item:frame()
 		self.vx=self.attract*cos(a)+player.dx*0.5
 		self.vy=self.attract*sin(a)+player.dy*0.5
 	else self.vy=max(self.dy-0.03,-1.7) end
-	if self.y<lstg.world.b-32 then Del(self) end
+	if self.y<lstg.world.boundb then Del(self) end
 	if self.attract>=8 then self.collected=true end
 end
 
@@ -201,7 +201,7 @@ function item_faith_minor:frame()
 			self.vy=max(self.dy-0.03,-2.5)
 			self.vx=0
 		end
-		if self.y<lstg.world.b-32 then Del(self) end
+		if self.y<lstg.world.boundb then Del(self) end
 	end
 	if Dist(self,player)<10 then
 		PlaySound('item00',0.3,self.x/200)
@@ -335,7 +335,7 @@ function item.PlayerReinit()
 	--if lstg.var.score % 10 ~= 9 then item.AddScore(1) end
 end
 ------------------------------------------
---HZC���յ�ϵͳ
+--HZC的收点系统
 function item.playercollect(n)
 	New(tasker,function()
 		local z=0

@@ -3,12 +3,14 @@ LuaSTG Special Plus 系 rep函数库
 data by OLC
 ]]
 
+local splogfile="sp_log.txt"
+
 local function _log(...)
     local list = {...}
     local str = tostring(list[1])
     for i = 2, #list do str = str.."\t"..tostring(list[i]) end
     Print(str)
-    local f, msg = io.open('sp_log.txt', 'a')
+    local f, msg = io.open(splogfile, 'a')
     if not(msg) then
         f:write(string.format("%s\n", str))
         f:close()

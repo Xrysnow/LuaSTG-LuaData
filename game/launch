@@ -9,7 +9,7 @@ UnitList=ObjList
 GetnUnit=GetnObj
 
 ShowSplashWindow()
---
+
 function Serialize(o)
 	if type(o) == 'table' then
 		-- 特殊处理：lstg中部分表将数据保存在metatable的data域中，因此对于table必须重新生成一个干净的table进行序列化操作
@@ -35,7 +35,7 @@ end
 function DeSerialize(s)
 	return cjson.decode(s)
 end
---
+
 -- 按键常量
 KEY={NULL=0x00}
 
@@ -209,10 +209,47 @@ default_network=
 	delay=-1
 }
 
--- Serialize和DeSerialize应该没必要在弄个Serialize1和DeSerialize1出来，应该不会有兼容性问题吧
--- 原版的Serialize和DeSerialize存在注入问题，建议否决
+local function format_json(str)
+	local ret = ''
+	local indent = '	'
+	local level = 0
+	local in_string = false
+	for i = 1, #str do
+		local s = string.sub(str, i, i)
+		if s == '{' and (not in_string) then
+			level = level + 1
+			ret = ret .. '{\n' .. string.rep(indent, level)
+		elseif s == '}' and (not in_string) then
+			level = level - 1
+			ret = string.format(
+					'%s\n%s}', ret, string.rep(indent, level))
+		elseif s == '"' then
+			in_string = not in_string
+			ret = ret .. '"'
+		elseif s == ':' and (not in_string) then
+			ret = ret .. ': '
+		elseif s == ',' and (not in_string) then
+			ret = ret .. ',\n'
+			ret = ret .. string.rep(indent, level)
+		elseif s == '[' and (not in_string) then
+			level = level + 1
+			ret = ret .. '[\n' .. string.rep(indent, level)
+		elseif s == ']' and (not in_string) then
+			level = level - 1
+			ret = string.format(
+					'%s\n%s]', ret, string.rep(indent, level))
+		else
+			ret = ret .. s
+		end
+	end
+	return ret
+end
+
+local settingfile="Library\\setting"
+local networkfile="Library\\network.txt"
+
 loadNetwork = function()
-	f,msg=io.open('network.txt','r')
+	f,msg=io.open(networkfile,'r')
 	if f==nil then
 		network=DeSerialize(Serialize(default_network))
 	else
@@ -220,9 +257,21 @@ loadNetwork = function()
 		f:close()
 	end
 end
+
+function saveNetwork()
+	local f,msg
+	f,msg=io.open(networkfile,'w')
+	if f==nil then
+		error(msg)
+	else
+		f:write(format_json(Serialize(network)))
+		f:close()
+	end
+end
+
 loadConfigure = function()
 	local f,msg
-	f,msg=io.open('setting','r')
+	f,msg=io.open(settingfile,'r')
 	if f==nil then
 		setting=DeSerialize(Serialize(default_setting))
 	else
@@ -231,17 +280,27 @@ loadConfigure = function()
 	end
 	loadNetwork()
 end
--- 先装载一次配置
-loadConfigure()
+
+function saveConfigure()
+	local f,msg
+	f,msg=io.open(settingfile,'w')
+	if f==nil then
+		error(msg)
+	else
+		f:write(format_json(Serialize(setting)))
+		f:close()
+	end
+	saveNetwork()
+end
+
+loadConfigure()-- 先装载一次配置
 
 if setting.showcfg == nil or setting.showcfg == true then
-	-- 不使用os.execute以防止出现控制台
-	-- 新函数Execute
-	--Execute("GameConfigurer.exe")
-
 	-- 重新加载配置
 	loadConfigure()
 end
+
+saveConfigure()-- 保存
 
 if #args>=2 then loadstring(args[2])() end
 
@@ -256,7 +315,7 @@ end
 
 if updatelib then
 	lfs.chdir('data')
-	os.execute('..\\..\\tools\\7z\\7z.exe u -tzip -mcu=on -r ..\\data.zip *')
+	os.execute('..\\..\\tools\\7z\\7z.exe u -tzip -mcu=on -r ..\\Library\\data.zip *')
 	lfs.chdir('..')
 end
 
@@ -267,12 +326,6 @@ for _,v in ipairs({"data","background","se","music","font"}) do
 	end
 end
 
---[=[
-if setting.mod~='launcher' then
-	LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
-end
---]=]
----[=[
 if setting.mod~='launcher' then
 	if not(lfs.attributes('mod\\'..setting.mod..'.zip')==nil) then
 		LoadPack('mod\\'..setting.mod..'.zip')--正常加载mod
@@ -291,7 +344,6 @@ else
 		--使用游戏根目录里面的启动器
 	end
 end
---]=]
 
 SetSplash(false)
 SetTitle(setting.mod)
