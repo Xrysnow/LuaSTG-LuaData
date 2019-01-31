@@ -1,3 +1,10 @@
+---=====================================
+---luastg stage background
+---=====================================
+
+----------------------------------------
+---background
+
 background=Class(object)
 
 function background:init(is_sc_bg)
@@ -17,6 +24,9 @@ function background:render()
 	SetViewMode'world'
 	RenderClear(Color(0x00000000))
 end
+
+----------------------------------------
+---辅助工具
 
 camera_setter=Class(object)
 
