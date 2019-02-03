@@ -151,38 +151,12 @@ function FocusLoseFunc()
 	end
 end
 
---legecy
-
---不再使用，已转为jstg.GetInputEX
 function GetInput()
 	if stage.next_stage then
-		-- 把一些转场的破事放到这里处理，NOT GOOD
-		local w1=GetDefaultWorld()
-		jstg.ApplyWorld(w1)
-		
-		ResetLstgtmpvar()--重置lstg.tmpvar
-		ex.Reset()--重置ex全局变量
-		
-		if lstg.nextvar then
-			lstg.var=lstg.nextvar
-			lstg.nextvar =nil
-		end
-		-- 初始化随机数
-		if lstg.var.ran_seed then
-			--Print('RanSeed',lstg.var.ran_seed)
-			ran:Seed(lstg.var.ran_seed)
-		end
-		
 		KeyStatePre = {}
-		if not stage.next_stage.is_menu then
-			if scoredata.hiscore == nil then
-				scoredata.hiscore = {}
-			end
-			lstg.tmpvar.hiscore = scoredata.hiscore[stage.next_stage.stage_name..'@'..tostring(lstg.var.player_name)]
-		end
 	else
 		-- 刷新KeyStatePre
-		for k, v in pairs(setting.keys) do
+		for k, _ in pairs(setting.keys) do
 			KeyStatePre[k] = KeyState[k]
 		end
 	end
@@ -200,6 +174,5 @@ function GetInput()
 	elseif ext.replay.IsReplay() then
 		-- 回放时载入按键状态
 		replayReader:Next(KeyState)
-		--assert(replayReader:Next(KeyState), "Unexpected end of replay file.")
 	end
 end

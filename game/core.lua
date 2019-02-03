@@ -30,7 +30,14 @@ lstg.DoFile("lib\\Lplugin.lua")--用户插件
 
 ---设置标题
 function ChangeGameTitle()
-	local title=setting.mod..' | FPS='..GetFPS()..' | Objects='..GetnObj()..' | Luastg Ex Plus'
+	local title=""
+	if #setting.mod<=0 then
+		title="Luastg Ex Plus 0.81b"
+	else
+		title=setting.mod
+	end
+	title=title..string.format(" | FPS=%.1f",GetFPS())
+	title=title..' | Objects='..GetnObj()
 	if jstg.network.status>0 then
 		title=title..' | '..jstg.NETSTATES[jstg.network.status]
 		if jstg.network.status>4 then

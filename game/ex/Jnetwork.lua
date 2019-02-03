@@ -96,6 +96,7 @@ function jstg.ProceedConnect()
 		while dt do
 			--Print(jstg.network.status,dt)
 			lstg.Log(1,LOG_MODULE_NAME,jstg.network.status,dt)
+			
 			--由服务器发送的数据
 			if string.sub(dt,1,1)=='S' then
 				--服务器发送该游戏副本的Slot号，如果是1则认为是房主，负责处理其他信息

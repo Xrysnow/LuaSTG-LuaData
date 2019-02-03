@@ -7,12 +7,14 @@ local LOG_MODULE_NAME="[jstg][player|input]"
 ----------------------------------------
 ---Input
 
-jstg.keys={}--各个输入槽位对应的当前帧按键状态
-jstg.keypres={}--各个输入槽位对应的前一帧按键状态
+jstg.keys={}--各个自机输入槽位对应的当前帧按键状态
+jstg.keypres={}--各个自机输入槽位对应的前一帧按键状态
+jstg.keysys={}--各个系统输入槽位对应的当前帧按键状态
+jstg.keysyspre={}--各个系统输入槽位对应的前一帧按键状态
 jstg.KeyState={}
 jstg.KeyStatePre={}
 jstg.LastKey=0--最后输入的按键对应的VKEYcode
-jstg.OldKeyState={}--这屌玩意一直是空的表，不知道干嘛用的，也有可能是一个引用类型的表
+jstg.OldKeyState={}--这一个引用类型的表
 
 ---旧函数，获取最后按下的按键
 _GetLastKey=GetLastKey
@@ -78,8 +80,12 @@ jstg.enable_player=false--若进入关卡初始化后该值为false，则代表�
 function jstg.CreateInput(count)
 	jstg.inputcount=count
 	for i=count,0,-1 do
+		--自机输入槽位
 		jstg.keys[i]={}
 		jstg.keypres[i]={}
+		--系统输入槽位
+		jstg.keysys[i]={}
+		jstg.keysyspre[i]={}
 	end
 end
 
@@ -272,3 +278,103 @@ function jstg.GetInputSingleEx(i,is_pause)
 		end
 	end
 end
+
+----------------------------------------
+---Game Input Test
+---by ETC
+---用于测试一些特性
+
+--[====================================[
+
+---刷新输入状态
+---@param is_pause boolean @是否处于暂停状态
+function jstg.GetInputEx(is_pause)
+	--single input
+	for i=1,jstg.GetInputCount() do
+		jstg.GetSingleInput(i,is_pause)
+	end
+	
+	--general input
+	for i=1,jstg.GetInputCount() do
+		--合并自机输入
+		for k,_ in pairs(setting.keys) do
+			jstg.keys[0][k]=jstg.keys[i][k] or jstg.keys[0][k]
+			jstg.keypres[0][k]=jstg.keypres[i][k] or jstg.keypres[0][k]
+		end
+		--合并系统输入
+		for k,_ in pairs(setting.keysys) do
+			jstg.keysys[0][k]=jstg.keysys[i][k] or jstg.keysys[0][k]
+			jstg.keysyspre[0][k]=jstg.keysyspre[i][k] or jstg.keysyspre[0][k]
+		end
+	end
+	
+	--get system input
+	KeyStatePre = {}
+	KeyState = jstg.KeyState
+	--update and get last key
+	for k, v in pairs(jstg.syskey) do
+		KeyStatePre[k] = KeyState[k]
+	end
+	jstg.LastKey=0
+	for k, v in pairs(jstg.syskey) do
+		local t = GetVKeyStateEx(0,jstg.syskey[k])
+		if t~= KeyState[k] then
+			local s=jstg.SysVKey2Key(v)
+			if t then
+				jstg.LastKey=s
+			else
+				if s==jstg.LastKey then
+					jstg.LastKey=0
+				end
+			end
+			KeyState[k]=t
+		end
+	end
+	
+	--Final
+	KeyStatePre=jstg.keypres[0]
+	KeyState=jstg.keys[0]
+end
+
+---从指定输入槽位刷新输入状态
+---@param i number @槽位
+---@param is_pause boolean @是否处于暂停状态
+function jstg.GetSingleInput(i,is_pause)
+	--------自机输入
+	--刷新KeyStatePre
+	if stage.next_stage then
+		--清空前一帧的状态
+		jstg.keypres[i]={}
+	else
+		for k,_ in pairs(setting.keys) do
+			jstg.keypres[i][k]=jstg.keys[i][k]
+		end
+	end
+	-- 不是录像时更新按键状态
+	if not ext.replay.IsReplay() then
+		for k,_ in pairs(setting.keys) do
+			jstg.keys[i][k]=GetVKeyStateEx(jstg.network.playerkeymask[i],jstg.syskey[k])
+		end
+	end
+	--写入、读取按键状态
+	if not is_pause then
+		if ext.replay.IsRecording() then
+			-- 录像模式下记录当前帧的按键
+			replayWriter:Record(jstg.keys[i])
+		elseif ext.replay.IsReplay() then
+			-- 回放时载入按键状态
+			replayReader:Next(jstg.keys[i])
+		end
+	end
+	--------系统输入
+	--常时刷新KeyStatePre
+	for k,_ in pairs(setting.keysys) do
+		jstg.keysyspre[i][k]=jstg.keysys[i][k]
+	end
+	--常时更新按键状态
+	for k,_ in pairs(setting.keysys) do
+		jstg.keysys[i][k]=GetVKeyStateEx(jstg.network.playerkeymask[i],jstg.syskey[k])
+	end
+end
+
+--]====================================]

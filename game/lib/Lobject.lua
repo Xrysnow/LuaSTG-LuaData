@@ -43,6 +43,7 @@ object={0,0,0,0,0,0;
 	colli=function(other)end,
 	kill=function()end
 }
+table.insert(all_class,object)
 
 ---define new class
 ---@param base object
