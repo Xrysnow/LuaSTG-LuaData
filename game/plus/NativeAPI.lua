@@ -150,6 +150,7 @@ local FALSE = ffi.cast("BOOL", 0)
 
 local UTF8ToUTF16LE
 local UTF16LEToUTF8
+local UTF8ToANSI
 
 ffi.cdef [[
     DWORD GetLastError();
@@ -252,6 +253,45 @@ UTF16LEToUTF8 = function(src, bytes)
 
     return ffi.string(buffer, count - 1)
 end
+
+UTF8ToANSI = function(src, bytes)--by ETC ，用于使用windows坑爹ANSI编码的函数
+    --获取源字符串长度
+    bytes = bytes or #src
+    if bytes == 0 then
+        return nil
+    end
+    
+    ----先转换成unicode
+    
+    --计算需要的字符数
+    local needed = kernel32.MultiByteToWideChar(CP_UTF8, 0, src, bytes, nil, 0)
+    if needed <= 0 then
+        error("MultiByteToWideChar: "..FormatLastError())
+    end
+    
+    local buffer = ffi.new("uint16_t[?]", needed + 1)
+    local count = kernel32.MultiByteToWideChar(CP_UTF8, 0, src, bytes, buffer, needed)
+    buffer[count] = 0
+    
+    ----再转成ANSI
+    
+    --计算需要的字符数
+    local needed2 = kernel32.WideCharToMultiByte(CP_ACP, 0, buffer, needed + 1, nil, 0, nil, nil)
+    if needed2 <= 0 then
+        error("MultiByteToWideChar: "..FormatLastError())
+    end
+    
+    local buffer2 = ffi.new("char[?]", needed2 + 1)
+    local count2 = kernel32.WideCharToMultiByte(CP_ACP, 0, buffer, needed + 1, buffer2, needed2, nil, nil)
+    buffer2[count2] = 0
+    
+    --return buffer2
+    return ffi.string(buffer2, count2 - 1)
+end
+
+__UTF8ToUTF16LE=UTF8ToUTF16LE
+__UTF16LEToUTF8=UTF16LEToUTF8
+__UTF8ToANSI=UTF8ToANSI
 
 -------------------------------------------------- 文件系统
 
