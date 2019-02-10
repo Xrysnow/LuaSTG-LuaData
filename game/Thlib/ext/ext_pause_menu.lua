@@ -29,121 +29,8 @@ function ext.pausemenu:init()
 		{'Return to Game','Return to Title','Give up and Retry'},
 		{'Return to Game','Return to Title','Replay Again'},
 	}
-end
-
-function ext.pausemenu:oldframe()
-	if self.kill then return "killed" end
 	
-	--根据是否是replay状态选择暂停菜单文字
-	local m
-	if ext.replay.IsReplay() then
-		m = 2
-	else
-		m = 1
-	end
-	--如果有可用的暂停菜单文字，则优先使用已有的
-	local pause_menu_text
-	if lstg.tmpvar.pause_menu_text then
-		pause_menu_text=lstg.tmpvar.pause_menu_text
-	else
-		pause_menu_text=self.text[m]
-	end
-	--检测按键切换槽位
-	if GetLastKey()==setting.keys.up and self.t<=0 then
-		if not self.choose then
-			self.pos=self.pos-1
-		else
-			self.pos2=self.pos2-1
-		end
-		PlaySound('select00',0.3)
-	end
-	if GetLastKey()==setting.keys.down and self.t<=0 then
-		if not self.choose then
-			self.pos=self.pos+1
-		else
-			self.pos2=self.pos2+1
-		end
-		PlaySound('select00',0.3)
-	end
-	self.pos=(self.pos-1)%(#pause_menu_text)+1
-	self.pos2=(self.pos2-1)%(2)+1
-	--last op
-	self.timer=self.timer+1
-	if self.t>0 then self.t=self.t-1 end
-	if self.choose then
-		self.eff=min(self.eff+1,15)
-	else
-		self.eff=max(self.eff-1,0)
-	end
-	--切换槽位震动
-	if self.pos_changed>0 then
-		self.pos_changed=self.pos_changed-1
-	end
-	if self.pos_pre~=self.pos then
-		self.pos_changed=ui.menu.shake_time
-	end
-	self.pos_pre=self.pos
-	--执行自身task
-	task.Do(self)
-	--执行选项操作
-	if (GetLastKey()==setting.keysys.menu or GetLastKey()==setting.keys.shoot or GetLastKey()==setting.keys.spell or GetLastKey()==setting.keysys.retry) and not self.lock then
-		if GetLastKey()==setting.keysys.retry then
-			PlaySound('ok00',0.3)
-			lstg.tmpvar.death = false
-			self.t=60
-			self.pos2=1
-			if ext.replay.IsReplay() then
-				ext.pause_menu_order='Replay Again'
-			else
-				ext.pause_menu_order='Give up and Retry'
-			end
-		end
-		if GetLastKey()==setting.keys.shoot and self.t<1 then
-			self.t=15
-			if not self.choose then
-				PlaySound('ok00',0.3)
-				if self.pos==1 then
-					lstg.tmpvar.death = false
-					ext.pause_menu_order=pause_menu_text[self.pos]
-				else
-					self.choose=true
-				end
-			else
-				if self.pos2==1 then
-					PlaySound('ok00',0.3)
-					self.t=60
-					if not(ext.sc_pr) then
-						task.New(self,function()
-							local _,bgm=EnumRes('bgm')
-							for i=1,30 do
-								for _,v in pairs(bgm) do
-									if GetMusicState(v)=='playing' then
-										SetBGMVolume(v,1-i/30)
-									end
-								end
-								task.Wait(1)
-							end
-						end)
-					end
-					self.t=60
-					lstg.tmpvar.death = false
-					ext.pause_menu_order=pause_menu_text[self.pos]
-				else
-					self.choose=false
-					PlaySound('cancel00',0.3)
-					self.t=15
-				end
-			end
-		end
-		if GetLastKey()==setting.keys.spell and self.t<1 and self.choose==true then
-			self.choose=false
-			self.t=15
-			PlaySound('cancel00',0.3)
-		end
-		if not lstg.tmpvar.death and (self.pos2==1 or self.pos==1) then
-			self:FlyOut()
-		end
-	end
+	self.bgmlist={}--用来储存正在播放的bgm
 end
 
 function ext.pausemenu:frame()
@@ -449,11 +336,19 @@ function ext.pausemenu:FlyOut()
 end
 
 function ext.pausemenu:PauseSound()
+	self.bgmlist={}--先清空列表
 	if not(ext.sc_pr) then
 		local _, bgm = EnumRes('bgm')
 		for _,v in pairs(bgm) do
+			--[[
 			if GetMusicState(v) ~= 'stopped' and v ~= 'deathmusic' then
 				PauseMusic(v)
+			end
+			--]]
+			--新的处理方法（实验性），只处理正在播放的bgm，不处理暂停的bgm
+			if GetMusicState(v) == "playing" and v ~= "deathmusic" then
+				PauseMusic(v)
+				self.bgmlist[v]=true--标记
 			end
 		end
 	end
@@ -470,7 +365,8 @@ end
 function ext.pausemenu:ResumeSound()
 	local _,bgm=EnumRes('bgm')
 	for _,v in pairs(bgm) do
-		if GetMusicState(v)~='stopped' then
+		--只对标记过为播放状态的bgm进行恢复
+		if GetMusicState(v)~='stopped' and self.bgmlist[v] then
 			ResumeMusic(v)
 		end
 	end
