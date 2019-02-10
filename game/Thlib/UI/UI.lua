@@ -1,7 +1,9 @@
+
 Include'THlib\\ui\\uiconfig.lua'
 Include'THlib\\ui\\font.lua'
 Include'THlib\\ui\\title.lua'
 Include'THlib\\ui\\sc_pr.lua'
+
 ui={}
 
 LoadTexture('boss_ui','THlib\\UI\\boss_ui.png')
@@ -212,8 +214,11 @@ function RenderScore(fontname,score,x,y,size,mode)
 		RenderText(fontname,string.format('99,999,999,999'),x,y,size,mode)
 	end
 end
---
+
+--[[
+
 diff_render_obj=Class(object)
+
 function diff_render_obj:init(x,y,_type,img)
 	self.group=GROUP_GHOST
 	self.bound=false
@@ -225,11 +230,9 @@ function diff_render_obj:init(x,y,_type,img)
 	self._a,self._r,self._g,self._b=255,255,255,255
 	ui_diff=self
 end
-function diff_render_obj:render()
-	Render(self.img,self.x,self.y,self.rot,self.hscale,self.vscale)
-end
 
---
+--]]
+
 function ResetUI()
 	if setting.resx>setting.resy then
 		if not CheckRes('img','image:UI_img') 	then LoadImageFromFile('ui_bg','THlib\\ui\\ui_bg.png') end
@@ -369,4 +372,5 @@ function ResetUI()
 		end
 	end
 end
+
 ResetUI()
