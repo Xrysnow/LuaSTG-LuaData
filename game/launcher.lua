@@ -4,7 +4,7 @@
 
 Include'THlib\\THlib.lua'
 
-local GetLastKey=_GetLastKey
+local GetLastKey=lstg.GetLastKey--_GetLastKey
 
 local _key_code_to_name=KeyCodeToName()--Linput
 local setting_item={'resx','resy','windowed','vsync','sevolume','bgmvolume','res'}

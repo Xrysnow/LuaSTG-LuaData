@@ -1,5 +1,6 @@
 ---=====================================
 ---stagegroup|replay|pausemenu system
+---extra game loop
 ---=====================================
 
 ----------------------------------------
@@ -44,10 +45,150 @@ function ext.PushPauseMenuOrder(msg)
 end
 
 ----------------------------------------
----extra game loop
+---extra user function
 
 function GameStateChange() end
 
+---设置标题
+function ChangeGameTitle()
+	local title=""
+	if #setting.mod<=0 then
+		title="Luastg Ex Plus 0.81b"
+	else
+		title=setting.mod
+	end
+	title=title..string.format(" | FPS=%.1f",GetFPS())
+	title=title..' | Objects='..GetnObj()
+	if jstg.network.status>0 then
+		title=title..' | '..jstg.NETSTATES[jstg.network.status]
+		if jstg.network.status>4 then
+			title=title..'('..jstg.network.delay..')'
+		end
+	end
+	SetTitle(title)
+end
+
+---切关处理
+function ChangeGameStage()
+	jstg.ResetWorlds()--by ETC，重置所有world参数
+	
+	lstg.ResetLstgtmpvar()--重置lstg.tmpvar
+	ex.Reset()--重置ex全局变量
+	
+	if lstg.nextvar then
+		lstg.var=lstg.nextvar
+		lstg.nextvar =nil
+	end
+	
+	-- 初始化随机数
+	if lstg.var.ran_seed then
+		--Print('RanSeed',lstg.var.ran_seed)
+		ran:Seed(lstg.var.ran_seed)
+	end
+	
+	--刷新最高分
+	if not stage.next_stage.is_menu then
+		if scoredata.hiscore == nil then
+			scoredata.hiscore = {}
+		end
+		lstg.tmpvar.hiscore = scoredata.hiscore[stage.next_stage.stage_name..'@'..tostring(lstg.var.player_name)]
+	end
+	
+	jstg.enable_player=false
+	
+	--切换关卡
+	stage.current_stage=stage.next_stage
+	stage.next_stage=nil
+	stage.current_stage.timer=0
+	stage.current_stage:init()
+	
+	if not jstg.enable_player then
+		jstg.Compatible()--创建自机，支持旧版本mod
+	end
+	
+	RunSystem('on_stage_init')
+end
+
+---获取输入（ex+中不使用）
+function GetInput()
+	if stage.next_stage then
+		KeyStatePre = {}
+	else
+		-- 刷新KeyStatePre
+		for k, _ in pairs(setting.keys) do
+			KeyStatePre[k] = KeyState[k]
+		end
+	end
+	
+	-- 不是录像时更新按键状态
+	if not ext.replay.IsReplay() then
+		for k,v in pairs(setting.keys) do
+			KeyState[k] = GetKeyState(v)
+		end
+	end
+	
+	if ext.replay.IsRecording() then
+		-- 录像模式下记录当前帧的按键
+		replayWriter:Record(KeyState)
+	elseif ext.replay.IsReplay() then
+		-- 回放时载入按键状态
+		replayReader:Next(KeyState)
+	end
+end
+
+---行为帧动作(和游戏循环的帧更新分开)
+function DoFrame()
+	--标题设置
+	ChangeGameTitle()
+	--切关处理
+	if stage.next_stage then ChangeGameStage() end
+	--刷新输入
+	jstg.GetInputEx()
+	--stage和object逻辑
+	SetPlayer()--清除jstg.current_player指向的自机
+	if GetCurrentSuperPause()<=0 or stage.nopause then
+		ex.Frame()
+		task.Do(stage.current_stage)
+		stage.current_stage:frame()
+		stage.current_stage.timer=stage.current_stage.timer+1
+	end
+	ObjFrame()
+	if GetCurrentSuperPause()<=0 or stage.nopause then
+		for i=1,jstg.GetWorldCount() do
+			jstg.SwitchWorld(i)
+			SetWorldFlag(jstg.worlds[i].world)
+			BoundCheck()
+		end
+	end
+	if GetCurrentSuperPause()<=0 then
+		CollisionCheck(GROUP_PLAYER,GROUP_ENEMY_BULLET)
+		CollisionCheck(GROUP_PLAYER,GROUP_ENEMY)
+		CollisionCheck(GROUP_PLAYER,GROUP_INDES)
+		CollisionCheck(GROUP_ENEMY,GROUP_PLAYER_BULLET)
+		CollisionCheck(GROUP_NONTJT,GROUP_PLAYER_BULLET)
+		CollisionCheck(GROUP_ITEM,GROUP_PLAYER)
+		--由OLC添加，可用于自机bomb
+		CollisionCheck(GROUP_SPELL,GROUP_ENEMY)
+		CollisionCheck(GROUP_SPELL,GROUP_NONTJT)
+		CollisionCheck(GROUP_SPELL,GROUP_ENEMY_BULLET)
+		CollisionCheck(GROUP_SPELL,GROUP_INDES)
+	end
+	UpdateXY()
+	AfterFrame()
+	--切关时清空资源和回收对象
+	if stage.next_stage and stage.current_stage then
+		stage.current_stage:del()
+		task.Clear(stage.current_stage)
+		if stage.preserve_res then
+			stage.preserve_res=nil
+		else
+			RemoveResource'stage'
+		end
+		ResetPool()
+	end
+end
+
+---缓速和加速
 function DoFrameEx()
 	if ext.replay.IsReplay() then
 		--播放录像时
@@ -87,6 +228,19 @@ function DoFrameEx()
 		end
 	end
 end
+
+function BeforeRender() end
+
+function AfterRender()
+	--暂停菜单渲染
+	local state=0
+	ext.pause_menu:render()
+end
+
+function GameExit() end
+
+----------------------------------------
+---extra game call-back function
 
 function FrameFunc()
 	if jstg then jstg.ProceedConnect() end--刷新网络状态
@@ -138,41 +292,10 @@ function RenderFunc()
 	EndScene()
 end
 
-function AfterRender()
-	--暂停菜单渲染
-	ext.pause_menu:render()
-end
-
 function FocusLoseFunc()
 	if ext.pause_menu==nil and stage.current_stage and jstg.network.status==0 then
 		if not stage.current_stage.is_menu then
 			ext.pop_pause_menu=true
 		end
-	end
-end
-
-function GetInput()
-	if stage.next_stage then
-		KeyStatePre = {}
-	else
-		-- 刷新KeyStatePre
-		for k, _ in pairs(setting.keys) do
-			KeyStatePre[k] = KeyState[k]
-		end
-	end
-	
-	-- 不是录像时更新按键状态
-	if not ext.replay.IsReplay() then
-		for k,v in pairs(setting.keys) do
-			KeyState[k] = GetKeyState(v)
-		end
-	end
-	
-	if ext.replay.IsRecording() then
-		-- 录像模式下记录当前帧的按键
-		replayWriter:Record(KeyState)
-	elseif ext.replay.IsReplay() then
-		-- 回放时载入按键状态
-		replayReader:Next(KeyState)
 	end
 end
