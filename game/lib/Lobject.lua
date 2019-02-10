@@ -137,6 +137,7 @@ function Del(o)
 	end
 end
 
+
 --！潜在问题：多玩家适配
 function SetV2(obj,v,angle,rot,aim)
 	if aim then
