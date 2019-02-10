@@ -1,9 +1,9 @@
---======================================
---luastg math
---======================================
+---=====================================
+---luastg math
+---=====================================
 
 ----------------------------------------
---常量
+---常量
 
 PI=math.pi
 PIx2=math.pi*2
@@ -15,7 +15,7 @@ SQRT2_2=math.sqrt(0.5)
 GOLD=360*(math.sqrt(5)-1)/2
 
 ----------------------------------------
---数学函数
+---数学函数
 
 int=math.floor
 abs=math.abs
@@ -31,7 +31,7 @@ if not math.mod then--坑爹新luajit没了mod函数
 end
 mod=math.mod
 
---获得数字的符号(1/-1/0)
+---获得数字的符号(1/-1/0)
 function sign(x)
 	if x>0 then
 		return 1
@@ -42,12 +42,12 @@ function sign(x)
 	end
 end
 
---获得(x,y)向量的模长
+---获得(x,y)向量的模长
 function hypot(x,y)
 	return sqrt(x*x+y*y)
 end
 
---阶乘，目前用于组合数和贝塞尔曲线
+---阶乘，目前用于组合数和贝塞尔曲线
 local fac = {}
 function Factorial(num)
 	if num < 0 then
@@ -72,7 +72,7 @@ function Factorial(num)
 	return result
 end
 
---组合数，目前用于贝塞尔曲线
+---组合数，目前用于贝塞尔曲线
 function combinNum(ord,sum)
 	if sum<0 or ord<0 then error("Can't get combinatorial of minus numbers.") end
 	ord=int(ord)
@@ -81,7 +81,7 @@ function combinNum(ord,sum)
 end
 
 ----------------------------------------
---随机数系统，用于支持replay系统
+---随机数系统，用于支持replay系统
 
 local ranx=Rand()
 ran = {}
