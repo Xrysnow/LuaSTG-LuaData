@@ -1,12 +1,12 @@
---======================================
---luastg scoredata
---======================================
+---=====================================
+---luastg scoredata
+---=====================================
 
 ----------------------------------------
---
+---scoredata
 
 function new_scoredata_table()
-	t={}
+	local t={}
 	setmetatable(t,{__newindex=scoredata_mt_newindex,__index=scoredata_mt_index,data={}})
 	return t
 end
