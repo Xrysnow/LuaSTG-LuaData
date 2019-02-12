@@ -12,11 +12,27 @@ function ResetScreen()
 	if setting.resx>setting.resy then
 		screen.width=640
 		screen.height=480
+		--[[
 		screen.scale=setting.resy/screen.height
 		screen.dx=(setting.resx-screen.scale*screen.width)*0.5
 		screen.dy=0
+		--]]
+		---[[
+		screen.hScale=setting.resx/screen.width
+		screen.vScale=setting.resy/screen.height
+		screen.resScale=setting.resx/setting.resy
+		screen.scale=math.min(screen.hScale,screen.vScale)
+		if screen.resScale>=(screen.width/screen.height) then
+			screen.dx=(setting.resx-screen.scale*screen.width)*0.5
+			screen.dy=0
+		else
+			screen.dx=0
+			screen.dy=(setting.resy-screen.scale*screen.height)*0.5
+		end
+		--]]
 		lstg.scale_3d=0.007*screen.scale
 		ResetWorld()
+		ResetWorldOffset()
 	else
 		--用于启动器
 		screen.width=396
@@ -27,6 +43,7 @@ function ResetScreen()
 		lstg.scale_3d=0.007*screen.scale
 		lstg.world={l=-192,r=192,b=-224,t=224,boundl=-224,boundr=224,boundb=-256,boundt=256,scrl=6,scrr=390,scrb=16,scrt=464,pl=-192,pr=192,pb=-224,pt=224}
 		SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
+		ResetWorldOffset()
 	end
 end
 
@@ -34,9 +51,24 @@ function ResetScreen2()
 	if setting.resx>setting.resy then
 		screen.width=640
 		screen.height=480
+		--[[
 		screen.scale=setting.resy/screen.height
 		screen.dx=(setting.resx-screen.scale*screen.width)*0.5
 		screen.dy=0
+		--]]
+		---[[
+		screen.hScale=setting.resx/screen.width
+		screen.vScale=setting.resy/screen.height
+		screen.resScale=setting.resx/setting.resy
+		screen.scale=math.min(screen.hScale,screen.vScale)
+		if screen.resScale>=(screen.width/screen.height) then
+			screen.dx=(setting.resx-screen.scale*screen.width)*0.5
+			screen.dy=0
+		else
+			screen.dx=0
+			screen.dy=(setting.resy-screen.scale*screen.height)*0.5
+		end
+		--]]
 		lstg.scale_3d=0.007*screen.scale
 	else
 		--用于启动器
@@ -178,8 +210,6 @@ function SetWorld(l,b,w,h,bound,m)
 	SetBound(lstg.world.boundl,lstg.world.boundr,lstg.world.boundb,lstg.world.boundt)
 end
 
-ResetScreen()--先初始化一次，！！！注意不能漏掉这一步
-
 ----------------------------------------
 ---3d
 
@@ -237,10 +267,34 @@ function SetViewMode(mode)
 		SetFog(lstg.view3d.fog[1],lstg.view3d.fog[2],lstg.view3d.fog[3])
 		SetImageScale(((((lstg.view3d.eye[1]-lstg.view3d.at[1])^2+(lstg.view3d.eye[2]-lstg.view3d.at[2])^2+(lstg.view3d.eye[3]-lstg.view3d.at[3])^2)^0.5)*2*math.tan(lstg.view3d.fovy*0.5))/(lstg.world.scrr-lstg.world.scrl))
 	elseif mode=='world' then
-		SetViewport(lstg.world.scrl*screen.scale+screen.dx,lstg.world.scrr*screen.scale+screen.dx,lstg.world.scrb*screen.scale+screen.dy,lstg.world.scrt*screen.scale+screen.dy)
-		SetOrtho(lstg.world.l,lstg.world.r,lstg.world.b,lstg.world.t)
+		--设置视口
+		SetViewport(
+			lstg.world.scrl*screen.scale+screen.dx,
+			lstg.world.scrr*screen.scale+screen.dx,
+			lstg.world.scrb*screen.scale+screen.dy,
+			lstg.world.scrt*screen.scale+screen.dy
+		)
+		--计算world宽高和偏移
+		local offset=lstg.worldoffset
+		local world={
+			height=(lstg.world.t-lstg.world.b),--world高度
+			width=(lstg.world.r-lstg.world.l),--world宽度
+		}
+		world.setheight=world.height*(1/offset.vscale)--缩放后的高度
+		world.setwidth=world.width*(1/offset.hscale)--缩放后的宽度
+		world.setdx=offset.dx*(1/offset.hscale)--水平整体偏移
+		world.setdy=offset.dy*(1/offset.vscale)--垂直整体偏移
+		--计算world最终参数
+		world.l=offset.centerx-(world.setwidth/2)+world.setdx
+		world.r=offset.centerx+(world.setwidth/2)+world.setdx
+		world.b=offset.centery-(world.setheight/2)+world.setdy
+		world.t=offset.centery+(world.setheight/2)+world.setdy
+		--应用参数
+		--SetOrtho(lstg.world.l,lstg.world.r,lstg.world.b,lstg.world.t)
+		SetOrtho(world.l,world.r,world.b,world.t)
 		SetFog()
-		SetImageScale((lstg.world.r-lstg.world.l)/(lstg.world.scrr-lstg.world.scrl))
+		--SetImageScale((lstg.world.r-lstg.world.l)/(lstg.world.scrr-lstg.world.scrl))
+		SetImageScale(1)
 	elseif mode=='ui' then
 		--SetOrtho(0.5,screen.width+0.5,-0.5,screen.height-0.5)--f2d底层已经有修正
 		SetOrtho(0,screen.width,0,screen.height)
@@ -268,3 +322,41 @@ function ScreenToWorld(x,y)--该功能并不完善
 	local dx,dy=WorldToScreen(0,0)
 	return x-dx,y-dy
 end
+
+----------------------------------------
+---world offset
+---by ETC
+---用于独立world本身的数据、world坐标系中心偏移和横纵缩放、world坐标系整体偏移
+
+local DEFAULT_WORLD_OFFSET={
+	centerx=0,centery=0,--world中心位置偏移
+	hscale=1,vscale=1,--world横向、纵向缩放
+	dx=0,dy=0,--整体偏移
+}
+
+lstg.worldoffset={
+	centerx=0,centery=0,--world中心位置偏移
+	hscale=1,vscale=1,--world横向、纵向缩放
+	dx=0,dy=0,--整体偏移
+}
+
+---重置world偏移
+function ResetWorldOffset()
+	lstg.worldoffset=lstg.worldoffset or {}
+	for k,v in pairs(DEFAULT_WORLD_OFFSET) do
+		lstg.worldoffset[k]=v
+	end
+end
+
+---设置world偏移
+function SetWorldOffset(centerx,centery,hscale,vscale)
+	lstg.worldoffset.centerx=centerx
+	lstg.worldoffset.centery=centery
+	lstg.worldoffset.hscale=hscale
+	lstg.worldoffset.vscale=vscale
+end
+
+----------------------------------------
+---init
+
+ResetScreen()--先初始化一次，！！！注意不能漏掉这一步

@@ -71,6 +71,7 @@ end
 ---切关处理
 function ChangeGameStage()
 	jstg.ResetWorlds()--by ETC，重置所有world参数
+	ResetWorldOffset()--by ETC，重置world偏移
 	
 	lstg.ResetLstgtmpvar()--重置lstg.tmpvar
 	ex.Reset()--重置ex全局变量

@@ -82,13 +82,15 @@ function laser_bent:frame()
 	
 	if self.alpha>0.999 and self._colli then
 		for _,player in pairs(Players(self)) do
-			--改为使用自机圆碰撞判定
-			if self._colli and self.data:CollisionCheck(player.x,player.y,player.rot,player.A,player.B,player.rect) then
+			--可改为使用自机圆碰撞判定
+			--if self._colli and self.data:CollisionCheck(player.x,player.y,player.rot,player.A,player.B,player.rect) then
+			if self._colli and self.data:CollisionCheck(player.x,player.y) then
 				player.class.colli(player,self)
 			end
-			--改为使用自机圆碰撞判定
 			if self.timer%4==0 then
-				if self._colli and self.data:CollisionCheckWidth(player.x,player.y,self.w+48,player.rot,player.A,player.B,player.rect) then
+				--可改为使用自机圆碰撞判定
+				--if self._colli and self.data:CollisionCheckWidth(player.x,player.y,self.w+48,player.rot,player.A,player.B,player.rect) then
+				if self._colli and self.data:CollisionCheckWidth(player.x,player.y,self.w+48) then
 					item.PlayerGraze()
 					player.grazer.grazed=true
 				end

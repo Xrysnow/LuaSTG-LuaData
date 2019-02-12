@@ -167,6 +167,7 @@ function float_text2:frame()
 end
 
 --震屏
+--fixed by ETC，不再直接改lrbt
 function misc.ShakeScreen(t,s)
 	if lstg.tmpvar.shaker then
 		lstg.tmpvar.shaker.time=t
@@ -182,35 +183,50 @@ function shaker_maker:init(time,size)
 	lstg.tmpvar.shaker=self
 	self.time=time
 	self.size=size
+	self.offset=lstg.worldoffset
+	--[[
 	self.l=lstg.world.l
 	self.r=lstg.world.r
 	self.bb=lstg.world.b
 	self.t=lstg.world.t
+	--]]
 end
 function shaker_maker:frame()
 	local a=int(self.timer/3)*360/5*2
 	local x=self.size*cos(a)
 	local y=self.size*sin(a)
+	self.offset.dx=x
+	self.offset.dy=y
+	--[[
 	lstg.world.l=self.l+x
 	lstg.world.r=self.r+x
 	lstg.world.b=self.bb+y
 	lstg.world.t=self.t+y
+	--]]
 	if self.timer==self.time then
 		Del(self)
 	end
 end
 function shaker_maker:del()
+	self.offset.dx=0
+	self.offset.dy=0
+	--[[
 	lstg.world.l=self.l
 	lstg.world.r=self.r
 	lstg.world.b=self.bb
 	lstg.world.t=self.t
+	--]]
 	lstg.tmpvar.shaker=nil
 end
 function shaker_maker:kill()
+	self.offset.dx=0
+	self.offset.dy=0
+	--[[
 	lstg.world.l=self.l
 	lstg.world.r=self.r
 	lstg.world.b=self.bb
 	lstg.world.t=self.t
+	--]]
 	lstg.tmpvar.shaker=nil
 end
 
