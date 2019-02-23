@@ -319,7 +319,7 @@ if updatelib then
 	lfs.chdir('..')
 end
 
-for _,v in ipairs({"data","background","se","music","font"}) do
+for _,v in ipairs({"core","data","background","se","music","font"}) do
 	local packpath="Library\\"..v..".zip"
 	if not (lfs.attributes(packpath)==nil) then
 		LoadPack(packpath)
