@@ -71,7 +71,7 @@ stage.group.DefStageFunc('SC Debugger@SC Debugger','init',function(self)
 		local cards={}
 		if index then
 			local cur_card=debug_boss.cards[index]
-			if cur_card[5] and debug_boss.cards[index-1] then
+			if cur_card.perform and debug_boss.cards[index-1] then
 				table.insert(cards,debug_boss.cards[index-1])
 			else
 				table.insert(cards,boss.move.New(0,144,60,MOVE_DECEL))
@@ -81,8 +81,14 @@ stage.group.DefStageFunc('SC Debugger@SC Debugger','init',function(self)
 			cards=debug_boss.cards
 		end
 		
-		local _boss_wait=true local _ref=New(debug_boss,cards) last=_ref
-		if _boss_wait then while IsValid(_ref) do task.Wait() end end
+		local _boss_wait=true
+		local _ref=New(debug_boss,cards)
+		last=_ref
+		if _boss_wait then
+			while IsValid(_ref) do
+				task.Wait(1)
+			end
+		end
 		task._Wait(180)
 	end)
 	task.New(self,function()

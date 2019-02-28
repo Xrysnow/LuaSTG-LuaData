@@ -1,29 +1,36 @@
---======================================
---luastg input
---======================================
+---=====================================
+---luastg input
+---=====================================
 
 ----------------------------------------
---按键状态更新
+---按键状态更新
 
 KeyState={}
 KeyStatePre={}
 
-function GetInput()--于ext中重载，然后被ESC抛弃了……
+---刷新输入
+function GetInput()
 	for k,v in pairs(setting.keys) do
 		KeyStatePre[k]=KeyState[k]
 		KeyState[k]=GetKeyState(v)
 	end
 end
 
+---是否按下
 function KeyIsDown(key)
 	return KeyState[key]
-end KeyPress = KeyIsDown
+end
 
+---是否在当前帧按下
 function KeyIsPressed(key)--于javastage中重载
 	return KeyState[key] and (not KeyStatePre[key])
-end KeyTrigger = KeyIsPressed
+end
 
---将按键二进制码转换为字面值，用于设置界面
+---兼容
+KeyPress = KeyIsDown
+KeyTrigger = KeyIsPressed
+
+---将按键二进制码转换为字面值，用于设置界面
 function KeyCodeToName()
 	local key2name={}
 	--按键code（参见launch和微软文档）作为索引，名称为值

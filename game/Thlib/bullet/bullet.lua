@@ -119,6 +119,24 @@ end
 function BulletBreak:frame()
 	if self.timer==23 then Del(self) end
 end
+
+if lstg.ResourceReference and true then--0.81c及以后
+	local STATIC_BULLETBKEF_RES={}
+	for i=1,16 do
+		STATIC_BULLETBKEF_RES[i]=lstg.ResourceReference("etbreak"..i,3)
+	end
+	
+	function BulletBreak:init(x,y,index)
+		self.x=x
+		self.y=y
+		self.group=GROUP_GHOST
+		self.layer=LAYER_ENEMY_BULLET-50
+		lstg.ObjectChangeResource(self,STATIC_BULLETBKEF_RES[index])
+		local s = ran:Float(0.5,0.75)
+		self.hscale=s self.vscale=s
+		self.rot=ran:Float(0,360)
+	end
+end
 --------------------------
 
 
@@ -204,9 +222,22 @@ function img_class:render()
 		SetImageState('preimg'..self.index,'',Color(255*self.timer/11,255,255,255))
 	end
 	Render('preimg'..self.index,self.x,self.y,self.rot,((11-self.timer)/11*3+1)*self.imgclass.size)
-	--[[
-	SetImageState('preimg'..self.index,'',Color(255*self.timer/11,255,255,255))
-	Render('preimg'..self.index,self.x,self.y,self.rot,((11-self.timer)/11*3+1)*self.imgclass.size)]]
+end
+if lstg.ResourceReference and true then--0.81c及以后
+	local STATIC_PREIMG_RES={}
+	for i=1,8 do
+		STATIC_PREIMG_RES[i]=lstg.ResourceReference("preimg"..i,2)
+	end
+	
+	function img_class:render()
+		local Res=STATIC_PREIMG_RES[self.index]
+		if self._blend then
+			SetImageStateEx(Res,self._blend,Color(255*self.timer/11,255,255,255))
+		else
+			SetImageStateEx(Res,"",Color(255*self.timer/11,255,255,255))
+		end
+		RenderEx(Res,self.x,self.y,self.rot,((11-self.timer)/11*3+1)*self.imgclass.size)
+	end
 end
 ----------------------------------------------------------------
 function ChangeBulletImage(obj,imgclass,index)

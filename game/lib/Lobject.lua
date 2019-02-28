@@ -43,6 +43,7 @@ object={0,0,0,0,0,0;
 	colli=function(other)end,
 	kill=function()end
 }
+table.insert(all_class,object)
 
 ---define new class
 ---@param base object
@@ -54,12 +55,13 @@ function Class(base, define)
 		--如果指定的基类base不存在(nil)，这个函数等效于不传入参数base，那么这个函数就会按照XXX=Class(object)处理
 		local dinfo = debug.getinfo(2)
 		local ret=""
-		ret=ret.."An empty base Class is encountered when defining a Class, which is equivalent to XXX =Class(object).\n"
-		ret=ret.."Be careful to check if this is the result you want.\n"
+		ret=ret.."定义新的object class类时使用了不存在的基类。\n"
+		ret=ret.."这将会等价于使用object class作为基类，即Class(object)。\n"
+		ret=ret.."谨慎检查这是否是您想要的结果。\n"
 		ret=ret.."----file: ["..dinfo.source.."]\n----line: "..dinfo.currentline
 		lstg.Log(3,LOG_MODULE_NAME,ret)
-		ret=ret.."\nIgnore this warning?"
-		lstg.MsgBoxLog(ret)
+		ret=ret.."\n忽略这个警告?"
+		lstg.MsgBoxWarn(ret)
 		--忽视警告，则使用默认基类object类
 		base=object
 	end
@@ -134,6 +136,7 @@ function Del(o)
 		OldDel(o)
 	end
 end
+
 
 --！潜在问题：多玩家适配
 function SetV2(obj,v,angle,rot,aim)

@@ -4,7 +4,7 @@
 
 Include'THlib\\THlib.lua'
 
-local GetLastKey=_GetLastKey
+local GetLastKey=lstg.GetLastKey--_GetLastKey
 
 local _key_code_to_name=KeyCodeToName()--Linput
 local setting_item={'resx','resy','windowed','vsync','sevolume','bgmvolume','res'}
@@ -86,9 +86,9 @@ end
 
 ---------------------------------------
 
-stage_init=stage.New('settings',true,true)
+stage_launcher=stage.New('settings',true,true)
 
-function stage_init:init()
+function stage_launcher:init()
 	LoadTTF('menuttfs','THlib\\UI\\font\\default_ttf',40)
 	--
 	local f,msg
@@ -253,7 +253,9 @@ function stage_init:init()
 	menu.FlyIn(menu_title,'right')
 end
 
-function stage_init:render() ui.DrawMenuBG() end
+function stage_launcher:render()
+	ui.DrawMenuBG()
+end
 
 ---------------------------------------
 
@@ -800,7 +802,6 @@ end
 
 function start_game()
 	loadConfigure()
-	jstg.ChangeInput() --20180516 bind new keys
 	LoadPack('mod\\'..setting.mod..'.zip')
 	SetSplash(false)
 	SetTitle(setting.mod)
@@ -822,6 +823,7 @@ function start_game()
 	SetResourceStatus'stage'
 	InitAllClass()--Lobject
 	InitScoreData()--initialize score data--Lscoredata
+	jstg.ChangeInput() --20180516 bind new keys
 	ext.reload()
 	stage.Set('none','init')
 end

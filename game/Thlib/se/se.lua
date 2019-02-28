@@ -49,7 +49,7 @@ local soundVolume = {
 	timeout = 0.6, timeout2 = 0.7, water = 0.6,
 }
 
-PlaySound = function(name, vol, pan, sndflag)
+function PlaySound(name, vol, pan, sndflag)
 	local v
 	if not(sndflag) then
 		v = soundVolume[name]

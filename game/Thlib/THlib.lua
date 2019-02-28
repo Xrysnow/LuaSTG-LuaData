@@ -7,6 +7,7 @@
 ---加载脚本
 
 Include'THlib\\misc\\misc.lua'
+Include'THlib\\WalkImageSystem.lua'
 Include'THlib\\se\\se.lua'
 Include'THlib\\music\\music.lua'
 Include'THlib\\item\\item.lua'
