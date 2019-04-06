@@ -55,7 +55,7 @@ function ext.pausemenu:frame()
 		local lastkey=GetLastKey()
 		--关闭暂停菜单
 		if lastkey==setting.keysys.menu then
-			if not ext.rep_over then
+			if (not ext.rep_over) and (not lstg.tmpvar.death) then
 				self.t=60
 				PlaySound('cancel00',0.3)
 				self.choose=false
@@ -103,7 +103,7 @@ function ext.pausemenu:frame()
 				PlaySound('cancel00',0.3)
 				self.choose=false
 			else
-				if not ext.rep_over then
+				if (not ext.rep_over) and (not lstg.tmpvar.death) then
 					self.t=60
 					PlaySound('cancel00',0.3)
 					self:FlyOut()
