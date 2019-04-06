@@ -11,14 +11,14 @@ local function DecToBin(dec,length)
 	while math.floor(dec/2)>0 do
 		local ret=math.floor(dec/2)
 		local bret=dec%2
-		print(ret,bret)
+		--print(ret,bret)
 		dec=ret
 		bitstr=bret..bitstr
 	end
 	
 	local ret=math.floor(dec/2)
 	local bret=dec%2
-	print(ret,bret)
+	--print(ret,bret)
 	dec=ret
 	bitstr=bret..bitstr
 	

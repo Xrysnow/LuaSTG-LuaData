@@ -19,6 +19,9 @@ end
 
 sp.Print(string.format("[sp] installing"))
 
+--SP+系 math函数库
+Include'sp\\spmath.lua'
+
 --SP+系 boss函数库
 Include'sp\\spboss.lua'
 
