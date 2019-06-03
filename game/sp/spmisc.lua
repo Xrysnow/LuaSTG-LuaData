@@ -1,22 +1,24 @@
---[[
-LuaSTG Special Plus 系 misc 函数库
-data by OLC
-]]
-
 local splogfile="sp_log.txt"
 
---输出log至sp_log文件
-local function _log(...)
-	local list = {...}
-	local str = tostring(list[1])
-	for i = 2, #list do str = str.."\t"..tostring(list[i]) end
+local f,msg=io.open(splogfile,'w')
+if not(msg) then f:close() end
+
+sp=sp or {}
+
+sp.Print=sp.Print or function(...)
+	local list,str={...},''
+	for i=1,#list do str=str..list[i] end
 	Print(str)
-	local f, msg = io.open(splogfile, 'a')
+	local f,msg=io.open(splogfile,'a')
 	if not(msg) then
-		f:write(string.format(" % s\n", str))
+		f:setvbuf('line')
+		f:write(string.format("%s\n",str))
 		f:close()
 	end
 end
+
+--输出log至sp_log文件
+local _log=sp.Print
 
 ---@class sp.misc
 local lib = {}
@@ -24,7 +26,7 @@ local lib = {}
 --建立lib函数绑定与sp_log文件更新
 if sp == nil then
 	sp = {}
-	local f, msg = io.open(splogfile, 'w')
+	local f, msg = io.open('sp_log.txt', 'w')
 	if not(msg) then f:close() end
 end
 sp.misc = lib
@@ -221,6 +223,34 @@ function lib.RenderRing4(img, x, y, r1, r2, r3, r4, n, N, ang, rot, length, blen
 	end
 end
 
+function lib.Render3DAura2D(img, x, y, z, r, rot, a1, a2, a3)
+	local lst = {}
+	local dx, dy, ref
+	for i = 1, 4 do
+		dx = r * cos(225 - i * 90 + rot)
+		dy = r * sin(225 - i * 90 + rot)
+		ref = sp.math.point3DT(dx, dy, z, 0, 0, 0, 0, a1, a2, a3)
+		table.insert(lst, ref[1][1] + x)
+		table.insert(lst, ref[1][2] + y)
+		table.insert(lst, 0.5)
+	end
+	Render4V(img, unpack(lst))
+end
+
+function lib.Render3DAura(img, x, y, z, r, rot, a1, a2, a3)
+	local lst = {}
+	local dx, dy, ref
+	for i = 1, 4 do
+		dx = r * cos(225 - i * 90 + rot)
+		dy = r * sin(225 - i * 90 + rot)
+		ref = sp.math.point3DT(dx, dy, z, 0, 0, 0, 0, a1, a2, a3)
+		table.insert(lst, ref[1][1] + x)
+		table.insert(lst, ref[1][2] + y)
+		table.insert(lst, ref[1][3])
+	end
+	Render4V(img, unpack(lst))
+end
+
 ---通过纹理渲染循环矩形
 ---@param tex string @纹理
 ---@param x number @起始x坐标
@@ -238,37 +268,37 @@ function lib.CreateLaser(tex, x, y, a, width, offset, blend, c, t)
 	local length = t % w
 	local endl = int(offset - n * w)
 	for i = 1, n do
-		RenderTexture(tex, blend, 
-				{x + (length + w * (i - 1)) * cos(a) - width * sin(a), y + (length + w * (i - 1)) * sin(a) + width * cos(a), 0.5, 0, 0, c}, 
-				{x + w * i * cos(a) - width * sin(a), y + w * i * sin(a) + width * cos(a), 0.5, w - length, 0, c}, 
-				{x + w * i * cos(a) + width * sin(a), y + w * i * sin(a) - width * cos(a), 0.5, w - length, h, c}, 
+		RenderTexture(tex, blend,
+				{x + (length + w * (i - 1)) * cos(a) - width * sin(a), y + (length + w * (i - 1)) * sin(a) + width * cos(a), 0.5, 0, 0, c},
+				{x + w * i * cos(a) - width * sin(a), y + w * i * sin(a) + width * cos(a), 0.5, w - length, 0, c},
+				{x + w * i * cos(a) + width * sin(a), y + w * i * sin(a) - width * cos(a), 0.5, w - length, h, c},
 				{x + (length + w * (i - 1)) * cos(a) + width * sin(a), y + (length + w * (i - 1)) * sin(a) - width * cos(a), 0.5, 0, h, c}
 				)
-		RenderTexture(tex, blend, 
-				{x + w * (i - 1) * cos(a) - width * sin(a), y + w * (i - 1) * sin(a) + width * cos(a), 0.5, w - length, 0, c}, 
-				{x + (length + w * (i - 1)) * cos(a) - width * sin(a), y + (length + w * (i - 1)) * sin(a) + width * cos(a), 0.5, w, 0, c}, 
-				{x + (length + w * (i - 1)) * cos(a) + width * sin(a), y + (length + w * (i - 1)) * sin(a) - width * cos(a), 0.5, w, h, c}, 
+		RenderTexture(tex, blend,
+				{x + w * (i - 1) * cos(a) - width * sin(a), y + w * (i - 1) * sin(a) + width * cos(a), 0.5, w - length, 0, c},
+				{x + (length + w * (i - 1)) * cos(a) - width * sin(a), y + (length + w * (i - 1)) * sin(a) + width * cos(a), 0.5, w, 0, c},
+				{x + (length + w * (i - 1)) * cos(a) + width * sin(a), y + (length + w * (i - 1)) * sin(a) - width * cos(a), 0.5, w, h, c},
 				{x + w * (i - 1) * cos(a) + width * sin(a), y + w * (i - 1) * sin(a) - width * cos(a), 0.5, w - length, h, c}
 				)
 	end
 	if length <= endl then
-		RenderTexture(tex, blend, 
-				{x + (length + w * n) * cos(a) - width * sin(a), y + (length + w * n) * sin(a) + width * cos(a), 0.5, 0, 0, c}, 
-				{x + (w * n + endl) * cos(a) - width * sin(a), y + (w * n + endl) * sin(a) + width * cos(a), 0.5, endl - length, 0, c}, 
-				{x + (w * n + endl) * cos(a) + width * sin(a), y + (w * n + endl) * sin(a) - width * cos(a), 0.5, endl - length, h, c}, 
+		RenderTexture(tex, blend,
+				{x + (length + w * n) * cos(a) - width * sin(a), y + (length + w * n) * sin(a) + width * cos(a), 0.5, 0, 0, c},
+				{x + (w * n + endl) * cos(a) - width * sin(a), y + (w * n + endl) * sin(a) + width * cos(a), 0.5, endl - length, 0, c},
+				{x + (w * n + endl) * cos(a) + width * sin(a), y + (w * n + endl) * sin(a) - width * cos(a), 0.5, endl - length, h, c},
 				{x + (length + w * n) * cos(a) + width * sin(a), y + (length + w * n) * sin(a) - width * cos(a), 0.5, 0, h, c}
 				)
-		RenderTexture(tex, blend, 
-				{x + w * n * cos(a) - width * sin(a), y + w * n * sin(a) + width * cos(a), 0.5, w - length, 0, c}, 
-				{x + (length + w * n) * cos(a) - width * sin(a), y + (length + w * n) * sin(a) + width * cos(a), 0.5, w, 0, c}, 
-				{x + (length + w * n) * cos(a) + width * sin(a), y + (length + w * n) * sin(a) - width * cos(a), 0.5, w, h, c}, 
+		RenderTexture(tex, blend,
+				{x + w * n * cos(a) - width * sin(a), y + w * n * sin(a) + width * cos(a), 0.5, w - length, 0, c},
+				{x + (length + w * n) * cos(a) - width * sin(a), y + (length + w * n) * sin(a) + width * cos(a), 0.5, w, 0, c},
+				{x + (length + w * n) * cos(a) + width * sin(a), y + (length + w * n) * sin(a) - width * cos(a), 0.5, w, h, c},
 				{x + w * n * cos(a) + width * sin(a), y + w * n * sin(a) - width * cos(a), 0.5, w - length, h, c}
 				)
 	else
-		RenderTexture(tex, blend, 
-				{x + w * n * cos(a) - width * sin(a), y + w * n * sin(a) + width * cos(a), 0.5, w - length, 0, c}, 
-				{x + (endl + w * n) * cos(a) - width * sin(a), y + (endl + w * n) * sin(a) + width * cos(a), 0.5, endl + w - length, 0, c}, 
-				{x + (endl + w * n) * cos(a) + width * sin(a), y + (endl + w * n) * sin(a) - width * cos(a), 0.5, endl + w - length, h, c}, 
+		RenderTexture(tex, blend,
+				{x + w * n * cos(a) - width * sin(a), y + w * n * sin(a) + width * cos(a), 0.5, w - length, 0, c},
+				{x + (endl + w * n) * cos(a) - width * sin(a), y + (endl + w * n) * sin(a) + width * cos(a), 0.5, endl + w - length, 0, c},
+				{x + (endl + w * n) * cos(a) + width * sin(a), y + (endl + w * n) * sin(a) - width * cos(a), 0.5, endl + w - length, h, c},
 				{x + w * n * cos(a) + width * sin(a), y + w * n * sin(a) - width * cos(a), 0.5, w - length, h, c}
 				)
 	end

@@ -631,27 +631,21 @@ function straight_495:frame()
 		local x, y = self.x, self.y
 		if y > world.t then
 			self.vy = -self.vy
-			if self.acceleration and self.acceleration.ay then
-				self.acceleration.ay = -self.acceleration.ay
-			end
+			self.ay = -self.ay
 			self.rot = -self.rot
 			self.reflected = true
 			return
 		end
 		if x > world.r then
 			self.vx = -self.vx
-			if self.acceleration and self.acceleration.ax then
-				self.acceleration.ax = -self.acceleration.ax
-			end
+			self.ay = -self.ay
 			self.rot = 180 - self.rot
 			self.reflected = true
 			return
 		end
 		if x < world.l then
 			self.vx = -self.vx
-			if self.acceleration and self.acceleration.ax then
-				self.acceleration.ax = -self.acceleration.ax
-			end
+			self.ax = -self.ax
 			self.rot = 180 - self.rot
 			self.reflected = true
 			return
